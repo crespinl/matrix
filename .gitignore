@@ -1,0 +1,11 @@
+.vscode/**
+CMakeFiles/**
+matrix-cppcheck-build-dir/**
+.ninja*
+build.ninja
+*.pdf
+*.cmake
+CMakeCache.txt
+Makefile
+matrix
+matrix.cppcheck
