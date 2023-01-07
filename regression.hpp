@@ -41,5 +41,6 @@ public:
 protected:
     T m_a;
     T m_b;
+    T m_r;
     std::vector<Coordinate<T>> m_data;
 };

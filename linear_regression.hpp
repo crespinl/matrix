@@ -50,6 +50,17 @@ public:
         }
         this->m_a = (numerator_1 - numerator_2) / denumerator;
         this->m_b = m_avg_y - this->m_a * m_avg_x;
+        T x_sum_sqares = 0;
+        for (auto& e : this->m_data)
+        {
+            x_sum_sqares += std::pow(e.x() - m_avg_x, 2);
+        }
+        T y_sum_sqares = 0;
+        for (auto& e : this->m_data)
+        {
+            y_sum_sqares += std::pow(e.y() - m_avg_y, 2);
+        }
+        this->m_r = std::sqrt((std::pow(this->m_a, 2) * x_sum_sqares) / y_sum_sqares);
     }
     T a() const
     {
@@ -59,12 +70,16 @@ public:
     {
         return this->m_b;
     }
+    T r()
+    {
+        return this->m_r;
+    }
     static void Assert(int& nb_success, int& nb_test)
     {
         CREATE_ASSERT_TRUE
         LinearRegression<double> lr { { { 1, 2 }, { 2, 4 }, { 4, 9 }, { 5, 10 } } };
         lr.calculate_model();
-        assert_true(likely_equals(lr.a(), 2.1) && likely_equals(lr.b(), -0.05), "LinearRegression doesn't work for a trivial test " + std::to_string(lr.b()));
+        assert_true(likely_equals(lr.a(), 2.1) && likely_equals(lr.b(), -0.05) && likely_equals(lr.r(), 0.9927108644188), "LinearRegression doesn't work for a trivial test");
     }
 
 private:
