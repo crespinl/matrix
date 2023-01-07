@@ -20,6 +20,7 @@ SPDX itentifier : GPL-3.0-or-later
 #pragma once
 #include "concepts.hpp"
 #include "errors.hpp"
+#include "tests.hpp"
 #include <algorithm>
 #include <concepts>
 #include <cstddef>
@@ -229,29 +230,7 @@ public:
     }
     static void Assert(int& nb_success, int& nb_test)
     {
-        auto assert_true = [&nb_success, &nb_test](bool test, std::string error_message) -> void
-        {
-            nb_test++; // There is no test number 0
-            if (test)
-            {
-                nb_success++;
-            }
-            else
-            {
-                std::cout << "Test " << nb_test << " failed : " << error_message << std::endl;
-            }
-        };
-#define ASSERT_THROWS(expr, text)                                             \
-    nb_test++;                                                                \
-    try                                                                       \
-    {                                                                         \
-        expr;                                                                 \
-        std::cout << "Test " << nb_test << " failed : " << text << std::endl; \
-    }                                                                         \
-    catch (...)                                                               \
-    {                                                                         \
-        nb_success++;                                                         \
-    }
+        CREATE_ASSERT_TRUE
         Matrix<int> matrix1(2, 2);
         matrix1.fill(0);
         Matrix<int> matrix2(2, 2);

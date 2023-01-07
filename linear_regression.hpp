@@ -19,8 +19,10 @@ SPDX itentifier : GPL-3.0-or-later
 */
 #pragma once
 
-#include <cmath>
 #include "regression.hpp"
+#include "tests.hpp"
+#include <cmath>
+#include <iomanip>
 
 template<NumberConcept T>
 class LinearRegression : public Regression<T>
@@ -48,6 +50,21 @@ public:
         }
         this->m_a = (numerator_1 - numerator_2) / denumerator;
         this->m_b = m_avg_y - this->m_a * m_avg_x;
+    }
+    T a() const
+    {
+        return this->m_a;
+    }
+    T b() const
+    {
+        return this->m_b;
+    }
+    static void Assert(int& nb_success, int& nb_test)
+    {
+        CREATE_ASSERT_TRUE
+        LinearRegression<double> lr { { { 1, 2 }, { 2, 4 }, { 4, 9 }, { 5, 10 } } };
+        lr.calculate_model();
+        assert_true(likely_equals(lr.a(), 2.1) && likely_equals(lr.b(), -0.05), "LinearRegression doesn't work for a trivial test " + std::to_string(lr.b()));
     }
 
 private:

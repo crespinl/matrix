@@ -21,6 +21,7 @@ SPDX itentifier : GPL-3.0-or-later
 
 #include "coordinate.hpp"
 #include <iostream>
+#include <string>
 #include <vector>
 
 template<NumberConcept T>

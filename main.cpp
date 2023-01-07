@@ -55,10 +55,7 @@ int main()
     int nb_success = 0;
     int nb_test = 0;
     Matrix<int>::Assert(nb_success, nb_test);
+    LinearRegression<int>::Assert(nb_success, nb_test);
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
-
-    LinearRegression<double> lr{{{1,2},{2,4}, {4,9} ,{5,10}}};
-    lr.calculate_model();
-    lr.display();
     return 0;
 }

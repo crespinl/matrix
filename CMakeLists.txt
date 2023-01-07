@@ -11,6 +11,7 @@ set(SRCS
 )
     
 set(HEADERS
+    tests.hpp
     linear_regression.hpp
     regression.hpp
     concepts.hpp
