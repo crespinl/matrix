@@ -31,16 +31,26 @@ public:
     Regression(std::vector<Coordinate<T>> const& data)
         : m_data(data)
     { }
-    void display() const
+    T r()
     {
-        std::cout << m_a << " " << m_b << std::endl;
+        return m_r;
     }
     virtual ~Regression() { }
     virtual void calculate_model() = 0;
 
 protected:
-    T m_a;
-    T m_b;
+    void calculate_averages()
+    {
+        for (auto& e : this->m_data)
+        {
+            m_avg_x += e.x();
+            m_avg_y += e.y();
+        }
+        m_avg_x /= this->m_data.size();
+        m_avg_y /= this->m_data.size();
+    }
     T m_r;
+    T m_avg_x;
+    T m_avg_y;
     std::vector<Coordinate<T>> m_data;
 };

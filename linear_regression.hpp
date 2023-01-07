@@ -30,49 +30,50 @@ class LinearRegression : public Regression<T>
 public:
     LinearRegression(std::vector<Coordinate<T>> const& data)
         : Regression<T>(data)
-        , m_avg_x(0)
-        , m_avg_y(0)
+        , m_a(0)
+        , m_b(0)
     { }
 
     void calculate_model() override
     {
-        calculate_averages();
+        Regression<T>::calculate_averages();
         T numerator_1 = 0;
         for (auto& e : this->m_data)
         {
             numerator_1 += e.x() * e.y();
         }
-        T numerator_2 = this->m_data.size() * m_avg_x * m_avg_y;
+        T numerator_2 = this->m_data.size() * this->m_avg_x * this->m_avg_y;
         T denumerator = 0;
         for (auto& e : this->m_data)
         {
-            denumerator += std::pow((e.x() - m_avg_x), 2);
+            denumerator += std::pow((e.x() - this->m_avg_x), 2);
         }
-        this->m_a = (numerator_1 - numerator_2) / denumerator;
-        this->m_b = m_avg_y - this->m_a * m_avg_x;
+        m_a = (numerator_1 - numerator_2) / denumerator;
+        m_b = this->m_avg_y - m_a * this->m_avg_x;
         T x_sum_sqares = 0;
         for (auto& e : this->m_data)
         {
-            x_sum_sqares += std::pow(e.x() - m_avg_x, 2);
+            x_sum_sqares += std::pow(e.x() - this->m_avg_x, 2);
         }
         T y_sum_sqares = 0;
         for (auto& e : this->m_data)
         {
-            y_sum_sqares += std::pow(e.y() - m_avg_y, 2);
+            y_sum_sqares += std::pow(e.y() - this->m_avg_y, 2);
         }
-        this->m_r = std::sqrt((std::pow(this->m_a, 2) * x_sum_sqares) / y_sum_sqares);
+        this->m_r = std::sqrt((std::pow(m_a, 2) * x_sum_sqares) / y_sum_sqares);
     }
     T a() const
     {
-        return this->m_a;
+        return m_a;
     }
     T b() const
     {
-        return this->m_b;
+        return m_b;
     }
-    T r()
+
+    void display() const
     {
-        return this->m_r;
+        std::cout << m_a << " " << m_b << std::endl;
     }
     static void Assert(int& nb_success, int& nb_test)
     {
@@ -83,16 +84,6 @@ public:
     }
 
 private:
-    void calculate_averages()
-    {
-        for (auto& e : this->m_data)
-        {
-            m_avg_x += e.x();
-            m_avg_y += e.y();
-        }
-        m_avg_x /= this->m_data.size();
-        m_avg_y /= this->m_data.size();
-    }
-    T m_avg_x;
-    T m_avg_y;
+    T m_a;
+    T m_b;
 };
