@@ -68,7 +68,7 @@ public:
         {
             for (size_t j = 0; j < m_y_max; j++)
             {
-                at(i, j) = t[i][j];
+                at(i, j) = t[j][i];
             }
         }
     }
