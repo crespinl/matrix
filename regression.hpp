@@ -31,10 +31,6 @@ public:
     Regression(std::vector<Coordinate<T>> const& data)
         : m_data(data)
     { }
-    T r()
-    {
-        return m_r;
-    }
     virtual ~Regression() { }
     virtual void calculate_model() = 0;
 
@@ -49,7 +45,6 @@ protected:
         m_avg_x /= this->m_data.size();
         m_avg_y /= this->m_data.size();
     }
-    T m_r;
     T m_avg_x;
     T m_avg_y;
     std::vector<Coordinate<T>> m_data;

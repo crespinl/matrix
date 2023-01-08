@@ -11,6 +11,8 @@ set(SRCS
 )
     
 set(HEADERS
+    polynomial_regression.hpp
+    proportional_regression.hpp
     tests.hpp
     linear_regression.hpp
     regression.hpp

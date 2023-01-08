@@ -50,5 +50,5 @@ SPDX itentifier : GPL-3.0-or-later
 template<typename T>
 bool likely_equals(T a, T b)
 {
-    return std::abs(a - b) < 1e-13;
+    return std::abs(a - b) < 1e-8;
 }

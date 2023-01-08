@@ -25,35 +25,33 @@ SPDX itentifier : GPL-3.0-or-later
 #include <iomanip>
 
 template<NumberConcept T>
-class LinearRegression : public PolynomialRegression<T>
+class ProportionalRegression : public PolynomialRegression<T>
 {
 public:
-    LinearRegression(std::vector<Coordinate<T>> const& data)
+    ProportionalRegression(std::vector<Coordinate<T>> const& data)
         : PolynomialRegression<T>(data)
     { }
 
     void calculate_model() override
     {
-        PolynomialRegression<T>::calculate_coef(1);
+        PolynomialRegression<T>::calculate_coef(1,true);        
     }
     T a() const
-    {
-        return this->m_coef[1];
-    }
-    T b() const
     {
         return this->m_coef[0];
     }
 
     void display() const
     {
-        std::cout << a() << " " << b() << std::endl;
+        std::cout << a() << std::endl;
     }
     static void Assert(int& nb_success, int& nb_test)
     {
         CREATE_ASSERT_TRUE
-        LinearRegression<double> lr { { { 1, 2 }, { 2, 4 }, { 4, 9 }, { 5, 10 } } };
-        lr.calculate_model();
-        assert_true(likely_equals(lr.a(), 2.1) && likely_equals(lr.b(), -0.05), "LinearRegression doesn't work for a trivial test");
+        ProportionalRegression<double> pr { { { 1, 1 }, { 3, 4 }, { 3, 5 } } };
+        pr.calculate_model();
+        assert_true(likely_equals(pr.a(), 1.4736842105263), "ProportionalRegression doesn't work for a trivial test");
     }
+
+private:
 };
