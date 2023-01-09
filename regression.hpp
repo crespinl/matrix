@@ -20,6 +20,7 @@ SPDX itentifier : GPL-3.0-or-later
 #pragma once
 
 #include "coordinate.hpp"
+#include <functional>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -44,6 +45,15 @@ protected:
         }
         m_avg_x /= this->m_data.size();
         m_avg_y /= this->m_data.size();
+    }
+    T sum_with_operation(std::function<T(Coordinate<T> const&)> f)
+    {
+        T result = 0;
+        for (auto& e : this->m_data)
+        {
+            result += f(e);
+        }
+        return result;
     }
     T m_avg_x;
     T m_avg_y;

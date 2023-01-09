@@ -20,8 +20,9 @@ SPDX itentifier : GPL-3.0-or-later
 #include "coordinate.hpp"
 #include "linear_regression.hpp"
 #include "matrix.hpp"
-#include "proportional_regression.hpp"
 #include "polynomial_regression.hpp"
+#include "proportional_regression.hpp"
+#include "exponential_regression.hpp"
 #include <cassert>
 #include <chrono>
 #include <fstream>
@@ -60,6 +61,8 @@ int main()
     LinearRegression<int>::Assert(nb_success, nb_test);
     ProportionalRegression<int>::Assert(nb_success, nb_test);
     PolynomialRegression<int>::Assert(nb_success, nb_test);
+    ExponentialRegression<int>::Assert(nb_success, nb_test);
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
+
     return 0;
 }
