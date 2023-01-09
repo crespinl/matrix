@@ -33,18 +33,17 @@ SPDX itentifier : GPL-3.0-or-later
         nb_success++;                                                         \
     }
 
-#define CREATE_ASSERT_TRUE                                                                   \
-    auto assert_true = [&nb_success, &nb_test](bool test, std::string error_message) -> void \
-    {                                                                                        \
-        nb_test++;                                                                           \
-        if (test)                                                                            \
-        {                                                                                    \
-            nb_success++;                                                                    \
-        }                                                                                    \
-        else                                                                                 \
-        {                                                                                    \
-            std::cout << "Test " << nb_test << " failed : " << error_message << std::endl;   \
-        }                                                                                    \
+#define CREATE_ASSERT_TRUE                                                                            \
+    auto assert_true = [&nb_success, &nb_test](bool test, std::string const& error_message) -> void { \
+        nb_test++;                                                                                    \
+        if (test)                                                                                     \
+        {                                                                                             \
+            nb_success++;                                                                             \
+        }                                                                                             \
+        else                                                                                          \
+        {                                                                                             \
+            std::cout << "Test " << nb_test << " failed : " << error_message << std::endl;            \
+        }                                                                                             \
     };
 
 template<typename T>

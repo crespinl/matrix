@@ -31,6 +31,8 @@ class Regression
 public:
     Regression(std::vector<Coordinate<T>> const& data)
         : m_data(data)
+        , m_avg_x(0)
+        , m_avg_y(0)
     { }
     virtual ~Regression() { }
     virtual void calculate_model() = 0;
