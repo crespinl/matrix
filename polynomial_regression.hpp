@@ -32,10 +32,12 @@ public:
     PolynomialRegression(std::vector<Coordinate<T>> const& data)
         : Regression<T>(data)
         , m_coef()
+        , m_null_y_intercept(false)
     { }
 
     void calculate_coef(int degree, bool null_y_intercept = false)
     {
+        m_null_y_intercept = null_y_intercept;
         Matrix<double> X { (size_t)(degree + (int)!null_y_intercept), this->m_data.size() };
         for (size_t j = 0; j < X.height(); j++)
         {
@@ -85,6 +87,26 @@ public:
         }
     }
 
+    T predict(T const& v) const override
+    {
+        T prediction = 0;
+        if (!m_null_y_intercept)
+        {
+            for (size_t i = 0; i < m_coef.size(); i++)
+            {
+                prediction += m_coef[i] * std::pow(v, i);
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < m_coef.size(); i++)
+            {
+                prediction += m_coef[i] * std::pow(v, i + 1);
+            }
+        }
+        return prediction;
+    }
+
     static void Assert(int& nb_success, int& nb_test)
     {
         CREATE_ASSERT_TRUE
@@ -92,8 +114,10 @@ public:
         pr.calculate_coef(4);
         auto coef = pr.get_coef();
         assert_true(likely_equals<double>(coef[0], 5) && likely_equals<double>(coef[1], 4) && likely_equals<double>(coef[2], 3) && likely_equals<double>(coef[3], 2) && likely_equals<double>(coef[4], 1), "PolynomialRegression doesn't work for a trivial test");
+        assert_true(likely_equals<double>(pr.predict(5), 975), "PolygomialRegression::predict is broken");
     }
 
 protected:
     std::vector<T> m_coef; // The coefficient of the lowest degree is stored in first
+    bool m_null_y_intercept;
 };

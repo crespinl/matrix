@@ -34,6 +34,7 @@ public:
     { }
     virtual ~Regression() { }
     virtual void calculate_model() = 0;
+    virtual T predict(T const& v) const = 0;
 
 protected:
     void calculate_averages()

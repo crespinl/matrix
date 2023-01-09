@@ -65,6 +65,11 @@ public:
         std::cout << m_b << std::endl;
     }
 
+    T predict(T const& v) const override
+    {
+        return m_a + m_b * std::log(v);
+    }
+
     static void Assert(int& nb_success, int& nb_test)
     {
         CREATE_ASSERT_TRUE

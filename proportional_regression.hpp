@@ -34,7 +34,7 @@ public:
 
     void calculate_model() override
     {
-        PolynomialRegression<T>::calculate_coef(1,true);        
+        PolynomialRegression<T>::calculate_coef(1, true);
     }
     T a() const
     {
@@ -51,6 +51,7 @@ public:
         ProportionalRegression<double> pr { { { 1, 1 }, { 3, 4 }, { 3, 5 } } };
         pr.calculate_model();
         assert_true(likely_equals(pr.a(), 1.4736842105263), "ProportionalRegression doesn't work for a trivial test");
+        assert_true(likely_equals(pr.predict(1), 1.473684210526315708), "ProportionalRegression::predict is broken");
     }
 
 private:
