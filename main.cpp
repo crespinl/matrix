@@ -19,11 +19,13 @@ SPDX itentifier : GPL-3.0-or-later
 */
 #include "coordinate.hpp"
 #include "exponential_regression.hpp"
+#include "exponential_regression_2.hpp"
 #include "linear_regression.hpp"
 #include "logarithmic_regression.hpp"
 #include "matrix.hpp"
 #include "polynomial_regression.hpp"
 #include "proportional_regression.hpp"
+#include "power_regression.hpp"
 #include <cassert>
 #include <chrono>
 #include <fstream>
@@ -58,13 +60,21 @@ int main()
 {
     int nb_success = 0;
     int nb_test = 0;
+    cout << setprecision(17);
     Matrix<int>::Assert(nb_success, nb_test);
     LinearRegression<int>::Assert(nb_success, nb_test);
     ProportionalRegression<int>::Assert(nb_success, nb_test);
     PolynomialRegression<int>::Assert(nb_success, nb_test);
     ExponentialRegression<int>::Assert(nb_success, nb_test);
+    ExponentialRegression2<int>::Assert(nb_success, nb_test);
     LogarithmicRegression<int>::Assert(nb_success, nb_test);
+    PowerRegression<int>::Assert(nb_success, nb_test);
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
+
+    PowerRegression<double> pr { { { 2, 16 }, { 1, 2 }, { 3, 54 }, { 4, 128 } } };
+    pr.calculate_model();
+    cout << pr.a() << ' ' << pr.b() << endl;
+    //Checker les log(0) !!!
 
     return 0;
 }
