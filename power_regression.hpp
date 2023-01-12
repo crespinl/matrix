@@ -35,7 +35,10 @@ public:
         : Regression<T>(data)
         , m_a(0)
         , m_b(0)
-    { }
+    {
+        // Actually, we simply remove all values with a null x or y to be sure we don't crash
+        this->apply_filter([](Coordinate<T> const& c) { return c.x() == 0 || c.y() == 0; });
+    }
 
     void calculate_model() override
     {
@@ -77,6 +80,9 @@ public:
         PowerRegression<double> pr { { { 2, 16 }, { 1, 2 }, { 3, 54 }, { 4, 128 } } };
         pr.calculate_model();
         assert_true(likely_equals<double>(pr.a(), 2.0000000000000009) && likely_equals<double>(pr.b(), 2.9999999999999996), "PowerRegression doesn't work for a trivial test");
+        PowerRegression<double> zero { { { 0, 0 }, { 0, 2.7 }, { 2, 0 }, { 1, 2 }, { 2, 16 } } };
+        zero.calculate_model();
+        assert_true(!std::isnan(zero.a()), "Null value in PowerRegression make it crash");
     }
 
 protected:

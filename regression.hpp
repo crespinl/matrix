@@ -58,6 +58,17 @@ protected:
         }
         return result;
     }
+    void apply_filter(std::function<bool(Coordinate<T> const&)> del) // Usefull to delete problematic values such as zeros in some cases
+    {
+        for (size_t i = 0; i < m_data.size(); i++)
+        {
+            if (del(m_data[i]))
+            {
+                m_data.erase(m_data.begin() + i);
+                i--;
+            }
+        }
+    }
     T m_avg_x;
     T m_avg_y;
     std::vector<Coordinate<T>> m_data;

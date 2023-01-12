@@ -35,7 +35,10 @@ public:
         : Regression<T>(data)
         , m_a(0)
         , m_b(0)
-    { }
+    {
+        // Actually, we simply remove all values with a null x to be sure we don't crash
+        this->apply_filter([](Coordinate<T> const& c) { return c.x() == 0; });
+    }
 
     void calculate_model() override
     {
@@ -76,6 +79,9 @@ public:
         LogarithmicRegression<double> pr { { { 1, 1 }, { 2, 2.38 }, { 3, 3.19 }, { 4, 3.77 } } };
         pr.calculate_model();
         assert_true(likely_equals<double>(pr.a(), 0.998238118404474406) && likely_equals<double>(pr.b(), 1.997149156434270711), "LogarithmicRegression doesn't work for a trivial test");
+        LogarithmicRegression<double> zero_x { { { 0, 0 }, { 1, 2.7 }, { 2, 7.3 } } };
+        zero_x.calculate_model();
+        assert_true(!std::isnan(zero_x.a()), "Null x in LogarithmicRegression make it crash");
     }
 
 protected:

@@ -35,7 +35,10 @@ public:
         : Regression<T>(data)
         , m_a(0)
         , m_b(0)
-    { }
+    {
+        // Actually, we simply remove all values with a null y to be sure we don't crash
+        this->apply_filter([](Coordinate<T> const& c) { return c.y() == 0; });
+    }
 
     void calculate_model() override
     {
@@ -78,6 +81,9 @@ public:
         ExponentialRegression2<double> er { { { 0, 2.72 }, { 1, 4.48 }, { 2, 7.39 } } };
         er.calculate_model();
         assert_true(likely_equals<double>(er.a(), 1.000379626572201364) && likely_equals<double>(er.b(), 0.499747927326102015), "ExponentialRegression2 doesn't work for a trivial test");
+        ExponentialRegression2<double> zero_y { { { 0, 0 }, { 1, 2.7 }, { 2, 7.3 } } };
+        zero_y.calculate_model();
+        assert_true(!std::isnan(zero_y.a()), "Null y in ExponentialRegression2 make it crash");
     }
 
 protected:

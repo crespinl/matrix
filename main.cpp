@@ -71,10 +71,5 @@ int main()
     PowerRegression<int>::Assert(nb_success, nb_test);
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
 
-    PowerRegression<double> pr { { { 2, 16 }, { 1, 2 }, { 3, 54 }, { 4, 128 } } };
-    pr.calculate_model();
-    cout << pr.a() << ' ' << pr.b() << endl;
-    //Checker les log(0) !!!
-
     return 0;
 }
