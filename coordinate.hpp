@@ -20,6 +20,7 @@ SPDX itentifier : GPL-3.0-or-later
 #pragma once
 #include "concepts.hpp"
 #include <iostream>
+#include <complex>
 
 template<NumberConcept T>
 class Coordinate
@@ -34,6 +35,11 @@ public:
     T& x() { return m_x; };
     T const& y() const { return m_y; };
     T& y() { return m_y; };
+
+    std::complex<T> to_complex() const
+    {
+        return {m_x, m_y};
+    }
 
     void display() const
     {
