@@ -49,20 +49,20 @@ class Matrix
 {
 public:
     Matrix(size_t x_max, size_t y_max)
-        : m_x_max(x_max)
+        : m_data(x_max * y_max)
+        , m_x_max(x_max)
         , m_y_max(y_max)
-        , m_data(x_max * y_max)
     { }
     Matrix(size_t max)
-        : m_x_max(max)
+        : m_data(max * max)
+        , m_x_max(max)
         , m_y_max(max)
-        , m_data(max * max)
     { }
     template<DoubleTableConcept DT>
     Matrix(DT const& t)
-        : m_x_max(t[0].size())
+        : m_data(t[0].size() * t.size())
+        , m_x_max(t[0].size())
         , m_y_max(t.size())
-        , m_data(t[0].size() * t.size())
     {
         for (size_t i = 0; i < m_x_max; i++)
         {
@@ -74,9 +74,9 @@ public:
     }
     Matrix(Matrix<T> const&) = default;
     Matrix(Matrix<T>&& other)
-        : m_x_max(std::move(other.m_x_max))
+        : m_data(std::move(other.m_data))
+        , m_x_max(std::move(other.m_x_max))
         , m_y_max(std::move(other.m_y_max))
-        , m_data(std::move(other.m_data))
     { }
     void fill(T const& value) // O (n*m)static_cast<size_t>(t.size());
     {

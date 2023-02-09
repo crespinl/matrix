@@ -69,7 +69,7 @@ protected:
             }
         }
     }
+    std::vector<Coordinate<T>> m_data;
     T m_avg_x;
     T m_avg_y;
-    std::vector<Coordinate<T>> m_data;
 };
