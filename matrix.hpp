@@ -43,7 +43,7 @@ A Matrix is represented like that :
 y
 
 */
-namespace Matrix
+namespace matrix
 {
 template<NumberConcept T>
 class Matrix

@@ -26,7 +26,7 @@ SPDX itentifier : GPL-3.0-or-later
 #include <iomanip>
 
 // y = a * x ^ b
-namespace Matrix
+namespace matrix
 {
 template<NumberConcept T>
 class PowerRegression : public Regression<T>

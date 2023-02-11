@@ -19,9 +19,9 @@ SPDX itentifier : GPL-3.0-or-later
 */
 #pragma once
 #include "concepts.hpp"
-#include <iostream>
 #include <complex>
-namespace Matrix
+#include <iostream>
+namespace matrix
 {
 template<NumberConcept T>
 class Coordinate
@@ -39,7 +39,7 @@ public:
 
     std::complex<T> to_complex() const
     {
-        return {m_x, m_y};
+        return { m_x, m_y };
     }
 
     void display() const

@@ -20,7 +20,7 @@ SPDX itentifier : GPL-3.0-or-later
 #pragma once
 #include <cmath>
 #include <limits>
-namespace Matrix
+namespace matrix
 {
 #define ASSERT_THROWS(expr, text)                                             \
     nb_test++;                                                                \

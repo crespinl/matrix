@@ -21,7 +21,7 @@ SPDX itentifier : GPL-3.0-or-later
 
 #include <stdexcept>
 #include <string>
-namespace Matrix
+namespace matrix
 {
 class Error : public std::runtime_error
 {

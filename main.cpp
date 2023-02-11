@@ -32,15 +32,16 @@ SPDX itentifier : GPL-3.0-or-later
 #include <iostream>
 #include <string>
 using namespace std;
-vector<Matrix::Matrix<double>> read_input_file()
+using namespace matrix;
+vector<Matrix<double>> read_input_file()
 {
     ifstream file { "./test_input.txt" };
-    vector<Matrix::Matrix<double>> r;
+    vector<Matrix<double>> r;
     while (file.peek() != EOF)
     {
         size_t n;
         file >> n;
-        Matrix::Matrix<double> m { n };
+        Matrix<double> m { n };
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < n; j++)
@@ -60,14 +61,14 @@ int main()
     int nb_success = 0;
     int nb_test = 0;
     cout << setprecision(17);
-    Matrix::Matrix<int>::Assert(nb_success, nb_test);
-    Matrix::LinearRegression<int>::Assert(nb_success, nb_test);
-    Matrix::ProportionalRegression<int>::Assert(nb_success, nb_test);
-    Matrix::PolynomialRegression<int>::Assert(nb_success, nb_test);
-    Matrix::ExponentialRegression<int>::Assert(nb_success, nb_test);
-    Matrix::ExponentialRegression2<int>::Assert(nb_success, nb_test);
-    Matrix::LogarithmicRegression<int>::Assert(nb_success, nb_test);
-    Matrix::PowerRegression<int>::Assert(nb_success, nb_test);
+    Matrix<int>::Assert(nb_success, nb_test);
+    LinearRegression<int>::Assert(nb_success, nb_test);
+    ProportionalRegression<int>::Assert(nb_success, nb_test);
+    PolynomialRegression<int>::Assert(nb_success, nb_test);
+    ExponentialRegression<int>::Assert(nb_success, nb_test);
+    ExponentialRegression2<int>::Assert(nb_success, nb_test);
+    LogarithmicRegression<int>::Assert(nb_success, nb_test);
+    PowerRegression<int>::Assert(nb_success, nb_test);
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
 
     return 0;

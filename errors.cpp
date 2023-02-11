@@ -19,49 +19,41 @@ SPDX itentifier : GPL-3.0-or-later
 */
 
 #include "errors.hpp"
-namespace Matrix
+namespace matrix
 {
 Error::Error(Error::Type t)
     : std::runtime_error { "" }
     , m_type { t }
 { }
 
-const char* Error::what() const throw()
+char const* Error::what() const throw()
 {
     switch (m_type)
     {
-        case Error::Type::access_out_of_range:
-        {
-            return "Access out of range";
-        }
-        case Error::Type::matrix_not_inversible:
-        {
-            return "The matrix is not inversible !";
-        }
-        case Error::Type::line_number_out_of_range:
-        {
-            return "Line number out of range";
-        }
-        case Error::Type::divide_by_zero:
-        {
-            return "Division by zero";
-        }
-        case Error::Type::multiply_matrix_size_not_compatible:
-        {
-            return "Can't multiply matrix whose dimensions are not compatible";
-        }
-        case Error::Type::add_matrix_size_not_compatible:
-        {
-            return "Can't add matrix whose size is not the same";
-        }
-        case Error::Type::too_small_table_to_fill_the_line:
-        {
-            return "Table too small to fill the line !";
-        }
-        default:
-        {
-            return "Unknown error";
-        }
+    case Error::Type::access_out_of_range: {
+        return "Access out of range";
+    }
+    case Error::Type::matrix_not_inversible: {
+        return "The matrix is not inversible !";
+    }
+    case Error::Type::line_number_out_of_range: {
+        return "Line number out of range";
+    }
+    case Error::Type::divide_by_zero: {
+        return "Division by zero";
+    }
+    case Error::Type::multiply_matrix_size_not_compatible: {
+        return "Can't multiply matrix whose dimensions are not compatible";
+    }
+    case Error::Type::add_matrix_size_not_compatible: {
+        return "Can't add matrix whose size is not the same";
+    }
+    case Error::Type::too_small_table_to_fill_the_line: {
+        return "Table too small to fill the line !";
+    }
+    default: {
+        return "Unknown error";
+    }
     }
 }
 }

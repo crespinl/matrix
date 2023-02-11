@@ -24,7 +24,7 @@ SPDX itentifier : GPL-3.0-or-later
 #include <iostream>
 #include <string>
 #include <vector>
-namespace Matrix
+namespace matrix
 {
 template<NumberConcept T>
 class Regression

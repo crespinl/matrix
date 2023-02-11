@@ -26,7 +26,7 @@ SPDX itentifier : GPL-3.0-or-later
 #include <iomanip>
 
 // y = a + b*ln(x)
-namespace Matrix
+namespace matrix
 {
 template<NumberConcept T>
 class LogarithmicRegression : public Regression<T>

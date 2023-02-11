@@ -26,7 +26,7 @@ SPDX itentifier : GPL-3.0-or-later
 #include <iomanip>
 
 // y = e^(a + b * x)
-namespace Matrix
+namespace matrix
 {
 template<NumberConcept T>
 class ExponentialRegression2 : public Regression<T>

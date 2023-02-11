@@ -21,7 +21,7 @@ SPDX itentifier : GPL-3.0-or-later
 #include <concepts>
 #include <iostream>
 #include <vector>
-namespace Matrix
+namespace matrix
 {
 template<typename T>
 concept TableConcept = requires(T t) {
