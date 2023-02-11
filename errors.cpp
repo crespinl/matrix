@@ -19,7 +19,8 @@ SPDX itentifier : GPL-3.0-or-later
 */
 
 #include "errors.hpp"
-
+namespace Matrix
+{
 Error::Error(Error::Type t)
     : std::runtime_error { "" }
     , m_type { t }
@@ -62,4 +63,5 @@ const char* Error::what() const throw()
             return "Unknown error";
         }
     }
+}
 }

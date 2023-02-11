@@ -21,7 +21,8 @@ SPDX itentifier : GPL-3.0-or-later
 
 #include <stdexcept>
 #include <string>
-
+namespace Matrix
+{
 class Error : public std::runtime_error
 {
 public:
@@ -41,3 +42,4 @@ public:
 private:
     Type m_type;
 };
+}

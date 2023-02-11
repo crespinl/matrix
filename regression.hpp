@@ -24,7 +24,8 @@ SPDX itentifier : GPL-3.0-or-later
 #include <iostream>
 #include <string>
 #include <vector>
-
+namespace Matrix
+{
 template<NumberConcept T>
 class Regression
 {
@@ -73,3 +74,4 @@ protected:
     T m_avg_x;
     T m_avg_y;
 };
+}

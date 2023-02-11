@@ -21,7 +21,8 @@ SPDX itentifier : GPL-3.0-or-later
 #include "concepts.hpp"
 #include <iostream>
 #include <complex>
-
+namespace Matrix
+{
 template<NumberConcept T>
 class Coordinate
 {
@@ -50,3 +51,4 @@ private:
     T m_x;
     T m_y;
 };
+}

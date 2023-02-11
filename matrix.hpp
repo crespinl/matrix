@@ -43,7 +43,8 @@ A Matrix is represented like that :
 y
 
 */
-
+namespace Matrix
+{
 template<NumberConcept T>
 class Matrix
 {
@@ -531,4 +532,5 @@ template<NumberConcept T>
 Matrix<T> inline operator*(T const& value, Matrix<T> const& m)
 {
     return Matrix<T>::multiply_constant(m, value);
+}
 }

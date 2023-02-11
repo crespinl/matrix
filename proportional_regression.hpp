@@ -23,7 +23,8 @@ SPDX itentifier : GPL-3.0-or-later
 #include "tests.hpp"
 #include <cmath>
 #include <iomanip>
-
+namespace Matrix
+{
 template<NumberConcept T>
 class ProportionalRegression : public PolynomialRegression<T>
 {
@@ -56,3 +57,4 @@ public:
 
 private:
 };
+}

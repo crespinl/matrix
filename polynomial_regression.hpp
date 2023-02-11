@@ -24,7 +24,8 @@ SPDX itentifier : GPL-3.0-or-later
 #include "tests.hpp"
 #include <cmath>
 #include <iomanip>
-
+namespace Matrix
+{
 template<NumberConcept T>
 class PolynomialRegression : public Regression<T>
 {
@@ -121,3 +122,4 @@ protected:
     std::vector<T> m_coef; // The coefficient of the lowest degree is stored in first
     bool m_null_y_intercept;
 };
+}

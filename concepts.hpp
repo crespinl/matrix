@@ -21,6 +21,8 @@ SPDX itentifier : GPL-3.0-or-later
 #include <concepts>
 #include <iostream>
 #include <vector>
+namespace Matrix
+{
 template<typename T>
 concept TableConcept = requires(T t) {
                            t[0];
@@ -49,3 +51,4 @@ concept NumberConcept = requires(T t) {
 // Test case for NumberConcept
 static_assert(NumberConcept<int>);
 static_assert(NumberConcept<float>);
+}

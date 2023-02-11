@@ -23,7 +23,8 @@ SPDX itentifier : GPL-3.0-or-later
 #include "tests.hpp"
 #include <cmath>
 #include <iomanip>
-
+namespace Matrix
+{
 template<NumberConcept T>
 class LinearRegression : public PolynomialRegression<T>
 {
@@ -57,3 +58,4 @@ public:
         assert_true(likely_equals(lr.a(), 2.1) && likely_equals(lr.b(), -0.05), "LinearRegression doesn't work for a trivial test");
     }
 };
+}

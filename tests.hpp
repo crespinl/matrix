@@ -20,7 +20,8 @@ SPDX itentifier : GPL-3.0-or-later
 #pragma once
 #include <cmath>
 #include <limits>
-
+namespace Matrix
+{
 #define ASSERT_THROWS(expr, text)                                             \
     nb_test++;                                                                \
     try                                                                       \
@@ -50,4 +51,5 @@ template<typename T>
 bool likely_equals(T a, T b)
 {
     return std::abs(a - b) < 1e-8;
+}
 }
