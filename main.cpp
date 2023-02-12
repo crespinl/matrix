@@ -33,28 +33,6 @@ SPDX itentifier : GPL-3.0-or-later
 #include <string>
 using namespace std;
 using namespace matrix;
-vector<Matrix<double>> read_input_file()
-{
-    ifstream file { "./test_input.txt" };
-    vector<Matrix<double>> r;
-    while (file.peek() != EOF)
-    {
-        size_t n;
-        file >> n;
-        Matrix<double> m { n };
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < n; j++)
-            {
-                double actual;
-                file >> actual;
-                m(j, i) = actual;
-            }
-        }
-        r.push_back(m);
-    }
-    return r;
-}
 
 int main()
 {
