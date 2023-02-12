@@ -70,7 +70,7 @@ public:
         result *= transposed;
         result *= Y;
         m_coef.reserve(result.height());
-        for (int i = 0; i < result.height(); i++)
+        for (size_t i = 0; i < result.height(); i++)
         {
             m_coef.push_back(result(0, i));
         }

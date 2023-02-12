@@ -497,7 +497,7 @@ private:
             s.divide_line(j, m(j, j));
         }
         // Then we make the matrix be the identity
-        for (size_t j = m.m_y_max - 2; j != -1; j--)
+        for (size_t j = m.m_y_max - 2; j != (size_t)-1; j--)
         {
             for (size_t k = j; k < m.m_x_max - 1; k++)
             {

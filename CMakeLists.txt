@@ -26,5 +26,5 @@ set(HEADERS
     matrix.hpp
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fdiagnostics-color=always")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fdiagnostics-color=always")
 add_executable(matrix ${SRCS} ${HEADERS})
