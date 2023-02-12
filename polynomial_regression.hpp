@@ -78,7 +78,7 @@ public:
 
     std::vector<T> get_coef() const { return m_coef; }
 
-    void calculate_model() override { }
+    void calculate_model() override { throw Error { Error::Type::polynomial_regression_call_calculate_model }; }
 
     void display() const
     {

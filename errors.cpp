@@ -51,6 +51,9 @@ char const* Error::what() const throw()
     case Error::Type::too_small_table_to_fill_the_line: {
         return "Table too small to fill the line !";
     }
+    case Error::Type::polynomial_regression_call_calculate_model: {
+        return "Can't call calculate_model on a pure polynomial regression. Use calculate_coef instead";
+    }
     default: {
         return "Unknown error";
     }

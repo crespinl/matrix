@@ -35,6 +35,7 @@ public:
         multiply_matrix_size_not_compatible,
         add_matrix_size_not_compatible,
         too_small_table_to_fill_the_line,
+        polynomial_regression_call_calculate_model,
     };
     Error(Type t);
     char const* what() const throw() override;
