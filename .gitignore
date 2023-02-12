@@ -10,3 +10,5 @@ Makefile
 matrix
 matrix.cppcheck
 fftw-3.3.10/**
+*.a
+*.json

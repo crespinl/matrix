@@ -7,7 +7,6 @@ set(CMAKE_BUILD_TYPE "Debug")
 
 set(SRCS
     errors.cpp
-    main.cpp
 )
     
 set(HEADERS
@@ -27,4 +26,8 @@ set(HEADERS
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fdiagnostics-color=always")
-add_executable(matrix ${SRCS} ${HEADERS})
+add_executable(matrix ${SRCS} main.cpp ${HEADERS})
+
+project(matrix_lib)
+
+add_library(matrix_lib STATIC ${SRCS} ${HEADERS})
