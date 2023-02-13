@@ -72,7 +72,7 @@ public:
 
     T predict(T const& v) const override
     {
-        return m_a * std::pow(m_b, v);
+        return m_a * std::pow(v, m_b);
     }
 
     static void Assert(int& nb_success, int& nb_test)
