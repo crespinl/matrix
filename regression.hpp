@@ -20,8 +20,10 @@ SPDX itentifier : GPL-3.0-or-later
 #pragma once
 
 #include "coordinate.hpp"
+#include "regression_stats.hpp"
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <vector>
 namespace matrix
@@ -38,6 +40,36 @@ public:
     virtual ~Regression() { }
     virtual void calculate_model() = 0;
     virtual T predict(T const& v) const = 0;
+    RegressionStats stats() const
+    {
+        RegressionStats stats;
+        stats.x_mean = ((double)1 / (double)m_data.size()) * sum_with_operation([](Coordinate<T> const& c) { return c.x(); });
+        stats.y_mean = ((double)1 / (double)m_data.size()) * sum_with_operation([](Coordinate<T> const& c) { return c.y(); });
+        stats.x_variance = ((double)1 / (double)m_data.size()) * sum_with_operation([&stats](Coordinate<T> const& c) { return std::pow(c.x() - stats.x_mean, 2); });
+        stats.y_variance = ((double)1 / (double)m_data.size()) * sum_with_operation([&stats](Coordinate<T> const& c) { return std::pow(c.y() - stats.y_mean, 2); });
+        stats.x_standart_deviation = std::sqrt(stats.x_variance);
+        stats.y_standart_deviation = std::sqrt(stats.y_variance);
+        stats.covariance = sum_with_operation([&](Coordinate<T> const& c) { return ((c.x() - stats.x_mean) * (c.y() - stats.y_mean)) / m_data.size(); });
+        double ssr = sum_with_operation([&](Coordinate<T> const& c) { return std::pow(c.y() - predict(c.x()), 2); });
+        double sst = sum_with_operation([&](Coordinate<T> const& c) { return std::pow(c.y() - stats.y_mean, 2); });
+        if (sst < std::numeric_limits<double>::epsilon())
+        {
+            if (ssr < std::numeric_limits<double>::epsilon()) // If ssr == 0, the model fits perfectly
+            {
+                stats.r2 = 1.;
+            }
+            else // Else, the model is totaly false, we usualy return 0 in this case
+            {
+                stats.r2 = 0.;
+            }
+        }
+        else
+        {
+            stats.r2 = 1. - (ssr / sst);
+        }
+        stats.r = std::sqrt(stats.r2); // If r2 is negative, r is not defined
+        return stats;
+    }
 
 protected:
     void calculate_averages()
@@ -50,7 +82,7 @@ protected:
         m_avg_x /= this->m_data.size();
         m_avg_y /= this->m_data.size();
     }
-    T sum_with_operation(std::function<T(Coordinate<T> const&)> f)
+    T sum_with_operation(std::function<T(Coordinate<T> const&)> f) const
     {
         T result = 0;
         for (auto& e : this->m_data)

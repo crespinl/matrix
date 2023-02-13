@@ -10,6 +10,7 @@ set(SRCS
 )
     
 set(HEADERS
+    regression_stats.hpp
     power_regression.hpp
     exponential_regression_2.hpp
     logarithmic_regression.hpp

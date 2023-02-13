@@ -53,6 +53,11 @@ public:
         pr.calculate_model();
         assert_true(likely_equals(pr.a(), 1.4736842105263), "ProportionalRegression doesn't work for a trivial test");
         assert_true(likely_equals(pr.predict(1), 1.473684210526315708), "ProportionalRegression::predict is broken");
+        // A test for Regression that is easier to do here
+        ProportionalRegression<long double> pr2 {{ { 1, 2 }, { 2, 4 }, { 4, 9 }, { 5, 15 } }};
+        pr2.calculate_model();
+        auto stats = pr2.stats();
+        assert_true(likely_equals(stats.r2, 0.92359018510546709), "R2 calculation in Regression::stats is broken");
     }
 
 private:

@@ -84,6 +84,11 @@ public:
         PowerRegression<double> zero { { { 0, 0 }, { 0, 2.7 }, { 2, 0 }, { 1, 2 }, { 2, 16 } } };
         zero.calculate_model();
         assert_true(!std::isnan(zero.a()), "Null value in PowerRegression make it crash");
+        //Test for Regression that is easier to do here
+        PowerRegression<long double> pr2 {{ { 1, 2 }, { 2, 4 }, { 4, 9 }, { 5, 15 } }};
+        pr2.calculate_model();
+        auto stats = pr2.stats();
+        assert_true(likely_equals(stats.r, 0.97691239419760723) && likely_equals(stats.r2, 0.95435782593690122), "R/R2 calculation is broken in Regression::stats");
     }
 
 protected:

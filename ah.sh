@@ -18,6 +18,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 SPDX itentifier : GPL-3.0-or-later
 */
 #pragma once
+namespace matrix
+{
+    
+}
 " >> ./$1.hpp
 
 sed -i 's@set(HEADERS@set(HEADERS\n    '$1'.hpp@g' CMakeLists.txt

@@ -1,12 +1,17 @@
 [
 {
   "directory": "/media/louis/Disque 2/Documents/Fichiers_C++/matrix",
-  "command": "/usr/bin/c++  -Wall -fdiagnostics-color=always -g -std=gnu++20 -o CMakeFiles/matrix.dir/errors.cpp.o -c \"/media/louis/Disque 2/Documents/Fichiers_C++/matrix/errors.cpp\"",
+  "command": "/usr/bin/c++  -Wall -Wextra -fdiagnostics-color=always -g -std=gnu++20 -o CMakeFiles/matrix.dir/errors.cpp.o -c \"/media/louis/Disque 2/Documents/Fichiers_C++/matrix/errors.cpp\"",
   "file": "/media/louis/Disque 2/Documents/Fichiers_C++/matrix/errors.cpp"
 },
 {
   "directory": "/media/louis/Disque 2/Documents/Fichiers_C++/matrix",
-  "command": "/usr/bin/c++  -Wall -fdiagnostics-color=always -g -std=gnu++20 -o CMakeFiles/matrix.dir/main.cpp.o -c \"/media/louis/Disque 2/Documents/Fichiers_C++/matrix/main.cpp\"",
+  "command": "/usr/bin/c++  -Wall -Wextra -fdiagnostics-color=always -g -std=gnu++20 -o CMakeFiles/matrix.dir/main.cpp.o -c \"/media/louis/Disque 2/Documents/Fichiers_C++/matrix/main.cpp\"",
   "file": "/media/louis/Disque 2/Documents/Fichiers_C++/matrix/main.cpp"
+},
+{
+  "directory": "/media/louis/Disque 2/Documents/Fichiers_C++/matrix",
+  "command": "/usr/bin/c++  -Wall -Wextra -fdiagnostics-color=always -g -std=gnu++20 -o CMakeFiles/matrix_lib.dir/errors.cpp.o -c \"/media/louis/Disque 2/Documents/Fichiers_C++/matrix/errors.cpp\"",
+  "file": "/media/louis/Disque 2/Documents/Fichiers_C++/matrix/errors.cpp"
 }
 ]

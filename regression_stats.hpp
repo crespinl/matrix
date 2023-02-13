@@ -1,4 +1,4 @@
-echo "/*
+/*
 Matrix
 Copyright (C) 2022-2023  Louis Crespin
 
@@ -16,11 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 SPDX itentifier : GPL-3.0-or-later
+*/
+#pragma once
+
 namespace matrix
 {
-    
+    struct RegressionStats
+    {
+        double x_mean;
+        double x_variance;
+        double x_standart_deviation;
+        double y_mean;
+        double y_variance;
+        double y_standart_deviation;
+        double covariance;
+        double r;
+        double r2;
+    };
 }
-*/
-" >> ./$1.cpp
-
-sed -i 's@set(SRCS@set(SRCS\n    '$1'.cpp@g' CMakeLists.txt

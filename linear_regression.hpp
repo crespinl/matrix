@@ -56,6 +56,12 @@ public:
         LinearRegression<double> lr { { { 1, 2 }, { 2, 4 }, { 4, 9 }, { 5, 10 } } };
         lr.calculate_model();
         assert_true(likely_equals(lr.a(), 2.1) && likely_equals(lr.b(), -0.05), "LinearRegression doesn't work for a trivial test");
+        //Tests for Regression thar are easier to do here
+        auto stats = lr.stats();
+        assert_true(likely_equals(stats.x_mean, 3.) && likely_equals(stats.y_mean, 6.25), "The mean is broken in Regression::stats");
+        assert_true(likely_equals(stats.x_variance, 2.5) && likely_equals(stats.y_variance, 11.1875), "The variance is broken in Regression::stats");
+        assert_true(likely_equals(stats.x_standart_deviation, 1.5811388300841898) && likely_equals(stats.y_standart_deviation, 3.344772040064913), "The mean is broken in Regression::stats");
+        assert_true(likely_equals(stats.covariance, 5.25), "The covariance is broken in Regression::stats");
     }
 };
 }
