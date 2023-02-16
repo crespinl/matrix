@@ -316,6 +316,23 @@ public:
         inversed_matrix(0, 1) = 1.5;
         inversed_matrix(1, 1) = -0.5;
 
+        Matrix<long double> bigger_matrix_to_inverse { std::vector<std::vector<long double>> {
+            { 1, 2, 3, 4 },
+            { 5, 2, 7, 8 },
+            { 9, 1, 8, 7 },
+            { 1, 3, 2, 4 } } };
+        bigger_matrix_to_inverse.inverse();
+
+        Matrix<long double> bigger_inversed_matrix { std::vector<std::vector<long double>> {
+            { -21. / 32., 1. / 32., 1. / 8., 3. / 8. },
+            { 33. / 32., -29. / 32., 3. / 8., 1. / 8. },
+            { 65. / 32., -29. / 32., 3. / 8., -7 / 8. },
+            { -13. / 8., 9. / 8., -1. / 2., 1. / 2. } } };
+        Matrix<long double> not_inversible_matrix { std::vector<std::vector<long double>> {
+            { 1, 2, 3 },
+            { 4, 5, 6 },
+            { 7, 8, 9 } } };
+
         assert_true(matrix1 == matrix2, "Two equals matrix are not considered as equal");
         assert_true(matrix1 != matrix3, "Two different matrix are considered as equal");
         assert_true(matrix1 != matrix4, "Two matrix with different size are considered as equal");
@@ -329,6 +346,8 @@ public:
         assert_true(Matrix<int>::get_identity(10).is_identity(), "Identity fails");
         ASSERT_THROWS(matrix1(10, 0), "Access out of range does not throws");
         assert_true(matrix_to_inverse == inversed_matrix, "Matrix inversion fails");
+        assert_true(bigger_matrix_to_inverse == bigger_inversed_matrix, "Matrix inversion fails");
+        ASSERT_THROWS(not_inversible_matrix.inverse(), "Inversion of a not inversable matrix doesn't throws");
 
 #undef ASSERT_THROWS
     }

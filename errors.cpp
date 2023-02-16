@@ -30,31 +30,40 @@ char const* Error::what() const throw()
 {
     switch (m_type)
     {
-    case Error::Type::access_out_of_range: {
+    case Error::Type::access_out_of_range:
+    {
         return "Access out of range";
     }
-    case Error::Type::matrix_not_inversible: {
+    case Error::Type::matrix_not_inversible:
+    {
         return "The matrix is not inversible !";
     }
-    case Error::Type::line_number_out_of_range: {
+    case Error::Type::line_number_out_of_range:
+    {
         return "Line number out of range";
     }
-    case Error::Type::divide_by_zero: {
+    case Error::Type::divide_by_zero:
+    {
         return "Division by zero";
     }
-    case Error::Type::multiply_matrix_size_not_compatible: {
+    case Error::Type::multiply_matrix_size_not_compatible:
+    {
         return "Can't multiply matrix whose dimensions are not compatible";
     }
-    case Error::Type::add_matrix_size_not_compatible: {
+    case Error::Type::add_matrix_size_not_compatible:
+    {
         return "Can't add matrix whose size is not the same";
     }
-    case Error::Type::too_small_table_to_fill_the_line: {
+    case Error::Type::too_small_table_to_fill_the_line:
+    {
         return "Table too small to fill the line !";
     }
-    case Error::Type::polynomial_regression_call_calculate_model: {
+    case Error::Type::polynomial_regression_call_calculate_model:
+    {
         return "Can't call calculate_model on a pure polynomial regression. Use calculate_coef instead";
     }
-    default: {
+    default:
+    {
         return "Unknown error";
     }
     }

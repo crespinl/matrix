@@ -24,8 +24,8 @@ SPDX itentifier : GPL-3.0-or-later
 #include "logarithmic_regression.hpp"
 #include "matrix.hpp"
 #include "polynomial_regression.hpp"
-#include "proportional_regression.hpp"
 #include "power_regression.hpp"
+#include "proportional_regression.hpp"
 #include <cassert>
 #include <chrono>
 #include <fstream>
