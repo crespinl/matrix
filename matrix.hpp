@@ -410,9 +410,9 @@ private:
         {
             return;
         }
-        T temp;
         for (size_t i = 0; i < m_x_max; i++)
         {
+            T temp;
             temp = at(i, l1);
             at(i, l1) = at(i, l2);
             at(i, l2) = temp;
