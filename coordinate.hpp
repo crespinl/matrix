@@ -32,6 +32,11 @@ public:
         , m_y(y)
     { }
 
+    explicit Coordinate()
+        : m_x(0)
+        , m_y(0)
+    { }
+
     T const& x() const { return m_x; };
     T& x() { return m_x; };
     T const& y() const { return m_y; };
@@ -40,6 +45,16 @@ public:
     std::complex<T> to_complex() const
     {
         return { m_x, m_y };
+    }
+
+    static Coordinate<T> from_complex(std::complex<T> const& c)
+    {
+        return { c.real(), c.imag() };
+    }
+
+    bool operator==(Coordinate<T> const& c) const
+    {
+        return c.x() == x() && c.y() == y();
     }
 
     void display() const

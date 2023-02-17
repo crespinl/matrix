@@ -10,6 +10,7 @@ set(SRCS
 )
     
 set(HEADERS
+    fourier.hpp
     regression_stats.hpp
     power_regression.hpp
     exponential_regression_2.hpp
