@@ -50,7 +50,7 @@ char const* Error::what() const throw()
     {
         return "Can't multiply matrix whose dimensions are not compatible";
     }
-    case Error::Type::add_matrix_size_not_compatible:
+    case Error::Type::add_substract_matrix_size_not_compatible:
     {
         return "Can't add matrix whose size is not the same";
     }
@@ -61,6 +61,14 @@ char const* Error::what() const throw()
     case Error::Type::polynomial_regression_call_calculate_model:
     {
         return "Can't call calculate_model on a pure polynomial regression. Use calculate_coef instead";
+    }
+    case Error::Type::wrong_number_of_arguments_in_predict:
+    {
+        return "Wrong number of argumentsin the matrix in predict";
+    }
+    case Error::Type::matrix_must_be_square:
+    {
+        return "The matrix must be square !";
     }
     default:
     {

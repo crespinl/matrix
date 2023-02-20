@@ -33,12 +33,15 @@ public:
         line_number_out_of_range,
         divide_by_zero,
         multiply_matrix_size_not_compatible,
-        add_matrix_size_not_compatible,
+        add_substract_matrix_size_not_compatible,
         too_small_table_to_fill_the_line,
         polynomial_regression_call_calculate_model,
+        wrong_number_of_arguments_in_predict,
+        matrix_must_be_square,
     };
     Error(Type t);
     char const* what() const throw() override;
+    Type type() const { return m_type; }
 
 private:
     Type m_type;

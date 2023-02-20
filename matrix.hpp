@@ -116,6 +116,9 @@ public:
     friend Matrix<P> operator+(Matrix<P> const& m1, Matrix<P> const& m2);
 
     template<NumberConcept P>
+    friend Matrix<P> operator-(Matrix<P> const& m1, Matrix<P> const& m2);
+
+    template<NumberConcept P>
     friend Matrix<P> operator*(Matrix<P> const& m1, Matrix<P> const& m2);
 
     template<NumberConcept P>
@@ -127,6 +130,12 @@ public:
     Matrix<T>& operator+=(Matrix<T> const& other)
     {
         *this = add(*this, other);
+        return *this;
+    }
+
+    Matrix<T>& operator-=(Matrix<T> const& other)
+    {
+        *this = substract(*this, other);
         return *this;
     }
 
@@ -379,7 +388,7 @@ private:
     {
         if (m1.m_x_max != m2.m_x_max || m1.m_y_max != m2.m_y_max)
         {
-            throw Error { Error::Type::add_matrix_size_not_compatible };
+            throw Error { Error::Type::add_substract_matrix_size_not_compatible };
         }
         Matrix<T> sum { m1.m_x_max, m1.m_y_max };
         for (size_t i = 0; i < m1.m_data.size(); i++)
@@ -387,6 +396,19 @@ private:
             sum.m_data[i] = m1.m_data[i] + m2.m_data[i];
         }
         return sum;
+    }
+    static Matrix<T> substract(Matrix<T> const& m1, Matrix<T> const& m2) // O(n*m)
+    {
+        if (m1.m_x_max != m2.m_x_max || m1.m_y_max != m2.m_y_max)
+        {
+            throw Error { Error::Type::add_substract_matrix_size_not_compatible };
+        }
+        Matrix<T> sub { m1.m_x_max, m1.m_y_max };
+        for (size_t i = 0; i < m1.m_data.size(); i++)
+        {
+            sub.m_data[i] = m1.m_data[i] - m2.m_data[i];
+        }
+        return sub;
     }
     static Matrix<T> multiply_constant(Matrix<T> const& m, T const& value) // O(n*m)
     {
@@ -536,6 +558,11 @@ template<NumberConcept T>
 Matrix<T> inline operator+(Matrix<T> const& m1, Matrix<T> const& m2)
 {
     return Matrix<T>::add(m1, m2);
+}
+template<NumberConcept T>
+Matrix<T> inline operator-(Matrix<T> const& m1, Matrix<T> const& m2)
+{
+    return Matrix<T>::substract(m1, m2);
 }
 template<NumberConcept T>
 Matrix<T> inline operator*(Matrix<T> const& m1, Matrix<T> const& m2)
