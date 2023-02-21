@@ -141,16 +141,24 @@ private:
         T c;
         T d;
         size_t n = this->m_data.size();
+        if (m_approx_d)
+        {
+            d = *m_approx_d;
+        }
+        else // d is supposed to be near the mean of the y values
+        {
+            d = this->sum_with_operation([](Coordinate<T> const& c) { return c.y(); }) / n;
+        }
         if (m_approx_a)
         {
             a = *m_approx_a;
         }
-        else // a is supposed to be near the abs of the greatest y
+        else // a is supposed to be near the abs of the greatest y - the y mean
         {
             a = 0;
             for (size_t i = 0; i < n; i++)
             {
-                T abs = std::abs(this->m_data[i].y());
+                T abs = std::abs(this->m_data[i].y() - d);
                 if (abs > a)
                 {
                     a = abs;
@@ -179,14 +187,6 @@ private:
         {
             // to evaluate
             c = 1;
-        }
-        if (m_approx_d)
-        {
-            d = *m_approx_d;
-        }
-        else // d is supposed to be near the mean of the y values
-        {
-            d = this->sum_with_operation([](Coordinate<T> const& c) { return c.y(); }) / n;
         }
         return { std::vector<std::vector<T>> { { a }, { b }, { c }, { d } } };
     }
