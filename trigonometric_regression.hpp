@@ -20,6 +20,7 @@ SPDX itentifier : GPL-3.0-or-later
 #pragma once
 #include "matrix.hpp"
 #include "regression.hpp"
+#include <algorithm>
 #include <cmath>
 #include <optional>
 namespace matrix
@@ -69,14 +70,14 @@ public:
     {
         // This is the Levenberg-Marquardt algorithm
         size_t const max_iter = 300;
-        T const initial_labmda = 0.01;
-        T const lambda_step = 2;
+        T const initial_lambda = 0.01;
+        T const lambda_step = 10;
         T const stop_condition = std::numeric_limits<T>::epsilon(); // If the khi2 of the model is smaller than stop_condition, we stop iterating
         auto p = initials_parameters();
         try
         {
             T current_khi2 = khi2(p);
-            T lambda = initial_labmda;
+            T lambda = initial_lambda;
             for (size_t i = 0; i < max_iter; i++)
             {
                 auto j = compute_jacobian_matrix(p);
@@ -99,7 +100,7 @@ public:
                     p = new_p;
                     lambda /= lambda_step;
                     current_khi2 = new_khi2;
-                    if (current_khi2 < stop_condition)//The model is precise enough
+                    if (current_khi2 < stop_condition) // The model is precise enough
                     {
                         break;
                     }
@@ -107,7 +108,7 @@ public:
                 else // We were to far
                 {
                     lambda *= lambda_step;
-                    //Skip the end and recompute parameters with the new lambda
+                    // Skip the end and recompute parameters with the new lambda
                 }
             }
         }
@@ -125,11 +126,11 @@ public:
         tr.calculate_model();
         TrigonometricRegression<long double> tr2 { std::vector<Coordinate<long double>> { { 0, 0 }, { 1., 0.8 }, { 3., 0.14 }, { 4., -0.75 } } };
         tr2.calculate_model();
-        TrigonometricRegression<long double> tr3 { std::vector<Coordinate<long double>> { { 0, 2.9 }, { 6, 2.29 }, { 12, 0.01 }, { 18, -2.28 }, { 24, -2.9 }, { 36, 1.19 }, { 48, 2.41 }, { 60, -2.15 } } };
-        tr3.guess_parameters({},{0.2},{},{});
+        TrigonometricRegression<long double> tr3 { std::vector<Coordinate<long double>> { { 0, 2.9 }, { 6, 2.29 }, { 12, 0.01 }, { 18, -2.28 }, { 24, -2.9 }, { 36, 1.19 }, { 48, 2.41 }, { 60, -2.15 }, {64, -2.91} } };
+        tr3.guess_parameters({}, {}, {2}, {});
         tr3.calculate_model();
         // Since the values in itselves are not very precise, the tests are quite inprecise
-        assert_true(std::abs(tr.a() - 1.00134) < 0.001, "TrigonometricRegression is broken"); // All parameters depends on each other, to testing one should be enough
+        assert_true(std::abs(tr.a() - 1.00134) < 0.001, "TrigonometricRegression is broken"); // All parameters depends on each other, so testing one should be enough
         assert_true(tr.stats().r2 >= 0.9999, "The R2 value should be bigger in TrigonometricRegression");
         assert_true(tr2.stats().r2 == 1, "The R2 value should be bigger in TrigonometricRegression");
         assert_true(std::abs(tr3.a() - 2.953) < 0.02, "Values not precise in TrigonometricRegression");
@@ -186,7 +187,7 @@ private:
             - to sort the values and search manualy two maxima or minima and assume that their difference is one period (b = 2*pi / period)
             - to use dft for that
             */
-            b = 1;
+            b = (2 * std::numbers::pi_v<T>) / find_guessed_signal_period();
         }
         if (m_approx_c)
         {
@@ -251,6 +252,54 @@ private:
     T khi2(Matrix<T> const& p)
     {
         return this->sum_with_operation([&](Coordinate<T> const& c) { return std::pow(c.y() - predict(p, c.x()), 2); });
+    }
+    T find_guessed_signal_period() const
+    {
+        /*Steps :
+        - We take a copy of the stored data
+        - We sort it
+        - We look for 2 maxima or minima
+        - We compute a guess for the signal period
+
+        */
+        std::vector<Coordinate<T>> data = this->m_data;
+        size_t n = data.size();
+        std::sort(data.begin(), data.end(), [](Coordinate<T> const& c1, Coordinate<T> const& c2) { return c1.x() < c2.x(); });
+        long int first = -1;
+        bool first_is_maxima = false;
+        for (size_t i = 2; i < n - 2; i++)
+        {
+            // maxima
+            if (data[i - 2].y() < data[i - 1].y() && data[i - 1].y() < data[i].y() && data[i].y() > data[i + 1].y() && data[i + 1].y() > data[i + 2].y())
+            {
+                if (first == -1)
+                {
+                    first = i;
+                    first_is_maxima = true;
+                }
+                else
+                {
+                    T r = data[i].x() - data[first].x();
+                    r = (first_is_maxima) ? r : r * 2;
+                    return r;
+                }
+            }
+            // minima
+            else if (data[i - 2].y() > data[i - 1].y() && data[i - 1].y() > data[i].y() && data[i].y() < data[i + 1].y() && data[i + 1].y() < data[i + 2].y())
+            {
+                if (first == -1)
+                {
+                    first = i;
+                }
+                else
+                {
+                    T r = data[i].x() - data[first].x();
+                    r = (first_is_maxima) ? r * 2 : r;
+                    return r;
+                }
+            }
+        }
+        return 2 * std::numbers::pi_v<T>; // if we founded nothing, we return the default period for a sinus
     }
     T m_a;
     T m_b;
