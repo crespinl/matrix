@@ -69,7 +69,7 @@ public:
         {
             for (size_t j = 0; j < m_y_max; j++)
             {
-                at(i, j) = t[j][i];
+                at_unsafe(i, j) = t[j][i];//Already checked
             }
         }
     }
@@ -169,14 +169,14 @@ public:
             {
                 if (i == j)
                 {
-                    if (at(i, j) != one_value)
+                    if (at_unsafe(i, j) != one_value)//Already checked
                     {
                         return false;
                     }
                 }
                 else
                 {
-                    if (at(i, j) != null_value)
+                    if (at_unsafe(i, j) != null_value)//Already checked
                     {
                         return false;
                     }
@@ -192,7 +192,7 @@ public:
         {
             for (size_t j = 0; j < m_y_max; j++)
             {
-                transposed(j, i) = at(i, j);
+                transposed(j, i) = at_unsafe(i, j);//Already checked
             }
         }
         std::swap(*this, transposed);
@@ -218,7 +218,7 @@ public:
         {
             throw Error { Error::Type::too_small_table_to_fill_the_line };
         }
-        size_t pos = index_of(0, y);
+        size_t pos = index_of_unsafe(0, y);//We've already check this access
         for (int i = 0; i < m_x_max; i++)
         {
             m_data[pos + i] = line[i];
@@ -233,7 +233,7 @@ public:
             std::cout << '|';
             for (size_t i = 0; i < m_x_max; i++)
             {
-                std::cout << m_data[index_of(i, j)] << '|';
+                std::cout << m_data[index_of_unsafe(i, j)] << '|';//Access out of bounds is not possible there
             }
             std::cout << std::endl;
         }
@@ -367,7 +367,7 @@ private:
         , m_y_max(y_max)
         , m_data(data)
     { }
-    size_t index_of(size_t x, size_t y) const
+    size_t index_of_safe(size_t x, size_t y) const
     {
         auto index = y * m_x_max + x;
         if (x >= m_x_max || y >= m_y_max || index >= m_x_max * m_y_max)
@@ -376,13 +376,25 @@ private:
         }
         return index;
     }
+    size_t index_of_unsafe(size_t x, size_t y) const
+    {
+        return y * m_x_max + x;
+    }
     T& at(size_t x, size_t y)
     {
-        return m_data[index_of(x, y)];
+        return m_data[index_of_safe(x, y)];
     };
     T const& at(size_t x, size_t y) const
     {
-        return m_data[index_of(x, y)];
+        return m_data[index_of_safe(x, y)];
+    }
+    T& at_unsafe(size_t x, size_t y)
+    {
+        return m_data[index_of_unsafe(x, y)];
+    };
+    T const& at_unsafe(size_t x, size_t y) const
+    {
+        return m_data[index_of_unsafe(x, y)];
     }
     static Matrix<T> add(Matrix<T> const& m1, Matrix<T> const& m2) // O(n*m)
     {
@@ -454,9 +466,9 @@ private:
         for (size_t i = 0; i < m_x_max; i++)
         {
             T temp;
-            temp = at(i, l1);
-            at(i, l1) = at(i, l2);
-            at(i, l2) = temp;
+            temp = at_unsafe(i, l1);//Already checked
+            at_unsafe(i, l1) = at_unsafe(i, l2);
+            at_unsafe(i, l2) = temp;
         }
     }
     void substract_line(size_t l1, size_t l2, T const& coef = 1)
@@ -467,7 +479,7 @@ private:
         }
         for (size_t i = 0; i < m_x_max; i++)
         {
-            at(i, l1) -= at(i, l2) * coef;
+            at_unsafe(i, l1) -= at_unsafe(i, l2) * coef;
         }
     }
     void divide_line(size_t l1, T const& value)
@@ -486,7 +498,7 @@ private:
         }
         for (size_t i = 0; i < m_x_max; i++)
         {
-            at(i, l1) /= value;
+            at_unsafe(i, l1) /= value;
         }
     }
     static Matrix<T> calculate_inverse(Matrix<T> m) // O(n^3)
