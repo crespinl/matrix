@@ -137,13 +137,14 @@ public:
         TrigonometricRegression<long double> tr2 { std::vector<Coordinate<long double>> { { 0, 0 }, { 1., 0.8 }, { 3., 0.14 }, { 4., -0.75 } } };
         tr2.calculate_model();
         TrigonometricRegression<long double> tr3 { std::vector<Coordinate<long double>> { { 0, 2.9 }, { 6, 2.29 }, { 12, 0.01 }, { 18, -2.28 }, { 24, -2.9 }, { 36, 1.19 }, { 48, 2.41 }, { 60, -2.15 }, { 64, -2.91 } } };
-        tr3.guess_parameters({}, {}, { 2 }, {});
+        tr3.guess_parameters({}, {}, {}, {});
         tr3.calculate_model();
         // Since the values in itselves are not very precise, the tests are quite inprecise
-        assert_true(std::abs(tr.a() - 1.00134) < 0.001, "TrigonometricRegression is broken"); // All parameters depends on each other, so testing one should be enough
-        assert_true(tr.stats().r2 >= 0.9999, "The R2 value should be bigger in TrigonometricRegression");
-        assert_true(tr2.stats().r2 == 1, "The R2 value should be bigger in TrigonometricRegression");
-        assert_true(std::abs(tr3.a() - 2.953) < 0.02, "Values not precise in TrigonometricRegression");
+        assert_true(std::abs(tr.a() - 1.00134) < 0.001, "TrigonometricRegression is broken (test 1)"); // All parameters depends on each other, so testing one should be enough
+        assert_true(tr.stats().r2 >= 0.9999, "The R2 value should be bigger in TrigonometricRegression (test 1)");
+        assert_true(tr2.stats().r2 == 1, "The R2 value should be bigger in TrigonometricRegression (test 2)");
+        assert_true(std::abs(tr3.b() - 0.148) < 0.02, "Values not precise in TrigonometricRegression (test 3)");
+        assert_true(tr3.stats().r2 > 0.999, "The R2 should be bigger in TrigonometricRegression (test 3)");
     }
 
 private:
@@ -151,64 +152,40 @@ private:
     {
         m_a = p(0, 0);
         m_b = p(0, 1);
-        m_c = p(0, 2);
+        m_c = mod(p(0, 2), 2 * std::numbers::pi_v<T>); // C is defined %2*pi
         m_d = p(0, 3);
     }
     Matrix<T> initials_parameters() const
     {
-        T a;
-        T b;
-        T c;
-        T d;
+        std::optional<T> a = m_approx_a;
+        std::optional<T> b = m_approx_b;
+        std::optional<T> c = m_approx_c;
+        std::optional<T> d = m_approx_d;
+        // First, we try to fill missings data by finding maxima or minima, wich is more precise but can fail
+        initials_parameters_with_max_or_min(a, b, c, d);
         size_t n = this->m_data.size();
-        if (m_approx_d)
-        {
-            d = *m_approx_d;
-        }
-        else // d is supposed to be near the mean of the y values
+        // Then, we use more conventional methods
+        if (!d)
         {
             d = this->sum_with_operation([](Coordinate<T> const& c) { return c.y(); }) / n;
         }
-        if (m_approx_a)
-        {
-            a = *m_approx_a;
-        }
-        else // a is supposed to be near the abs of the greatest y - the y mean
+        if (!a) // a is supposed to be near the abs of the greatest y - the y mean
         {
             a = 0;
             for (size_t i = 0; i < n; i++)
             {
-                T abs = std::abs(this->m_data[i].y() - d);
+                T abs = std::abs(this->m_data[i].y() - d.value());
                 if (abs > a)
                 {
                     a = abs;
                 }
             }
         }
-        if (m_approx_b)
+        if (c.has_value())
         {
-            b = *m_approx_b;
+            c = mod(c.value(), std::numbers::pi_v<T> * 2); // C is defined %2*pi
         }
-        else
-        {
-            /*
-            to evaluate :
-            Ideas :
-            - to sort the values and search manualy two maxima or minima and assume that their difference is one period (b = 2*pi / period)
-            - to use dft for that
-            */
-            b = (2 * std::numbers::pi_v<T>) / find_guessed_signal_period();
-        }
-        if (m_approx_c)
-        {
-            c = *m_approx_c;
-        }
-        else
-        {
-            // to evaluate
-            c = 1;
-        }
-        return { std::vector<std::vector<T>> { { a }, { b }, { c }, { d } } };
+        return { std::vector<std::vector<T>> { { a.value() }, { b.value_or(1) }, { c.value_or(1) }, { d.value() } } };
     }
     Matrix<T> compute_jacobian_matrix(Matrix<T> const& p)
     {
@@ -263,20 +240,19 @@ private:
     {
         return this->sum_with_operation([&](Coordinate<T> const& c) { return std::pow(c.y() - predict(p, c.x()), 2); });
     }
-    T find_guessed_signal_period() const
+    void initials_parameters_with_max_or_min(std::optional<T>& a, std::optional<T>& b, std::optional<T>& c, std::optional<T>& d) const
     {
-        /*Steps :
-        - We take a copy of the stored data
-        - We sort it
-        - We look for 2 maxima or minima
-        - We compute a guess for the signal period
-
-        */
+        if (a.has_value() && b.has_value() && c.has_value() && d.has_value())
+        {
+            return;
+        }
         std::vector<Coordinate<T>> data = this->m_data;
         size_t n = data.size();
         std::sort(data.begin(), data.end(), [](Coordinate<T> const& c1, Coordinate<T> const& c2) { return c1.x() < c2.x(); });
         long int first = -1;
         bool first_is_maxima = false;
+        long int second = -1;
+        bool second_is_maxima = false;
         for (size_t i = 2; i < n - 2; i++)
         {
             // maxima
@@ -289,9 +265,8 @@ private:
                 }
                 else
                 {
-                    T r = data[i].x() - data[first].x();
-                    r = (first_is_maxima) ? r : r * 2;
-                    return r;
+                    second = i;
+                    second_is_maxima = true;
                 }
             }
             // minima
@@ -303,13 +278,66 @@ private:
                 }
                 else
                 {
-                    T r = data[i].x() - data[first].x();
-                    r = (first_is_maxima) ? r * 2 : r;
-                    return r;
+                    second = i;
                 }
             }
         }
-        return 2 * std::numbers::pi_v<T>; // if we founded nothing, we return the default period for a sinus
+        if (second == -1)
+        {
+            return;
+        }
+        if (!d)
+        {
+            if (first_is_maxima != second_is_maxima)
+            {
+                d = (data[first].y() + data[second].y()) / 2;
+            }
+            else
+            {
+                d = this->sum_with_operation([](Coordinate<T> const& c) { return c.y(); }) / n;
+            }
+        }
+        if (!a)
+        {
+            T a1 = std::abs((first_is_maxima) ? data[first].y() - d.value() : d.value() - data[first].y());
+            T a2 = std::abs((second_is_maxima) ? data[second].y() - d.value() : d.value() - data[second].y());
+            a = (a1 + a2) / 2;
+        }
+        if (!b)
+        {
+            T r = data[second].x() - data[first].x();
+            if (first_is_maxima != second_is_maxima)
+            {
+                r *= 2;
+            }
+            b = (2 * std::numbers::pi_v<T>) / r;
+        }
+        if (!c)
+        {
+            if (first_is_maxima)
+            {
+                c = (std::numbers::pi_v<T> / 2) - b.value() * data[first].x();
+            }
+            else if (second_is_maxima)
+            {
+                c = (std::numbers::pi_v<T> / 2) - b.value() * data[second].x();
+            }
+        }
+    }
+    static T mod(T const& a, T const& b)
+    {
+        if (a > 0)
+        {
+            return fmod(a, b);
+        }
+        else if (a == 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return b - fmod(-a, b);
+        }
     }
     T m_a;
     T m_b;
