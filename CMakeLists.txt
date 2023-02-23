@@ -10,6 +10,7 @@ set(SRCS
 )
     
 set(HEADERS
+    lm_regression.hpp
     trigonometric_regression.hpp
     fourier.hpp
     regression_stats.hpp

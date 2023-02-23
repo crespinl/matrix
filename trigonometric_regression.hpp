@@ -18,27 +18,23 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 SPDX itentifier : GPL-3.0-or-later
 */
 #pragma once
-#include "matrix.hpp"
-#include "regression.hpp"
-#include <algorithm>
-#include <cmath>
-#include <optional>
+#include "lm_regression.hpp"
 namespace matrix
 {
 template<NumberConcept T>
-class TrigonometricRegression : public Regression<T>
+class TrigonometricRegression : public LMRegression<T>
 {
     // y = a * sin(b*x+c)+d
 public:
     TrigonometricRegression(std::vector<Coordinate<T>> const& data)
-        : Regression<T>(data)
+        : LMRegression<T>(data)
         , m_a(0)
         , m_b(0)
         , m_c(0)
         , m_d(0)
     { }
 
-    T predict(T const& v) const override
+    virtual T predict(T const& v) const override
     {
         return m_a * std::sin((m_b * v) + m_c) + m_d;
     }
@@ -66,68 +62,6 @@ public:
         m_approx_c = c;
         m_approx_d = d;
     }
-    void calculate_model() override
-    {
-        // This is the Levenberg-Marquardt algorithm
-        size_t const max_iter = 300;
-        T const initial_lambda = 0.01;
-        T const lambda_step = 10;
-        T const stop_condition = std::numeric_limits<T>::epsilon(); // If the khi2 of the model is smaller than stop_condition, we stop iterating
-        int const max_small_khi2_consecutive_changes = 5;
-        auto p = initials_parameters();
-        try
-        {
-            T current_khi2 = khi2(p);
-            T lambda = initial_lambda;
-            int actual_small_khi2_consecutive_changes = 0;
-            for (size_t i = 0; i < max_iter; i++)
-            {
-                auto j = compute_jacobian_matrix(p);
-                auto j_t = j;
-                j_t.transpose();
-                auto r = compute_residual_matrix(p);
-                auto delta = j_t * j;
-                auto di = diag(delta);
-                di *= lambda;
-                delta += di;
-                delta.inverse();
-                delta *= j_t;
-                delta.transpose();
-                delta *= r;
-
-                auto new_p = p - delta;
-                T new_khi2 = khi2(new_p);
-                if (std::abs(new_khi2 - current_khi2) < stop_condition)
-                {
-                    actual_small_khi2_consecutive_changes++;
-                    if (actual_small_khi2_consecutive_changes > max_small_khi2_consecutive_changes)
-                    {
-                        break;
-                    }
-                }
-                if (new_khi2 < current_khi2) // We have made progress
-                {
-                    p = new_p;
-                    lambda /= lambda_step;
-                    current_khi2 = new_khi2;
-                    if (current_khi2 < stop_condition) // The model is precise enough
-                    {
-                        break;
-                    }
-                }
-                else // We were to far
-                {
-                    lambda *= lambda_step;
-                    // Skip the end and recompute parameters with the new lambda
-                }
-            }
-        }
-        catch (Error const& e)
-        {
-            // We can get an error due to float precision. We return directly
-        }
-        apply(p);
-    }
 
     static void Assert(int& nb_success, int& nb_test)
     {
@@ -148,14 +82,14 @@ public:
     }
 
 private:
-    void apply(Matrix<T> const& p)
+    virtual void apply(Matrix<T> const& p) override
     {
         m_a = p(0, 0);
         m_b = p(0, 1);
         m_c = mod(p(0, 2), 2 * std::numbers::pi_v<T>); // C is defined %2*pi
         m_d = p(0, 3);
     }
-    Matrix<T> initials_parameters() const
+    virtual Matrix<T> initials_parameters() const override
     {
         std::optional<T> a = m_approx_a;
         std::optional<T> b = m_approx_b;
@@ -187,7 +121,7 @@ private:
         }
         return { std::vector<std::vector<T>> { { a.value() }, { b.value_or(1) }, { c.value_or(1) }, { d.value() } } };
     }
-    Matrix<T> compute_jacobian_matrix(Matrix<T> const& p)
+    virtual Matrix<T> compute_jacobian_matrix(Matrix<T> const& p) const override
     {
         size_t n = this->m_data.size();
         Matrix<T> r { n, 4 };
@@ -204,41 +138,13 @@ private:
         }
         return r;
     }
-    Matrix<T> compute_residual_matrix(Matrix<T> const& p)
-    {
-        size_t n = this->m_data.size();
-        Matrix<T> r { 1, n };
-        for (size_t i = 0; i < n; i++)
-        {
-            r(0, i) = predict(p, this->m_data[i].x()) - this->m_data[i].y();
-        }
-        return r;
-    }
-    static Matrix<T> diag(Matrix<T> const& m) // returns the diagonal coefficients of the matrix
-    {
-        if (!m.is_square())
-        {
-            throw Error(Error::Type::matrix_must_be_square);
-        }
-        Matrix<T> r = Matrix<T>::get_identity(m.height());
-        r.fill(0);
-        for (size_t i = 0; i < m.height(); i++)
-        {
-            r(i, i) = m(i, i);
-        }
-        return r;
-    }
-    static T predict(Matrix<T> const& m, T const& v)
+    virtual T predict_generic(Matrix<T> const& m, T const& v) const override
     {
         if (m.height() < 4)
         {
             throw Error(Error::Type::wrong_number_of_arguments_in_predict);
         }
         return m(0, 0) * std::sin(m(0, 1) * v + m(0, 2)) + m(0, 3);
-    }
-    T khi2(Matrix<T> const& p)
-    {
-        return this->sum_with_operation([&](Coordinate<T> const& c) { return std::pow(c.y() - predict(p, c.x()), 2); });
     }
     void initials_parameters_with_max_or_min(std::optional<T>& a, std::optional<T>& b, std::optional<T>& c, std::optional<T>& d) const
     {
