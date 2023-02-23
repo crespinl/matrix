@@ -192,7 +192,7 @@ public:
         {
             for (size_t j = 0; j < m_y_max; j++)
             {
-                transposed(j, i) = at_unsafe(i, j); // Already checked
+                transposed.at_unsafe(j, i) = at_unsafe(i, j); // Already checked
             }
         }
         std::swap(*this, transposed);
