@@ -69,7 +69,7 @@ public:
         {
             for (size_t j = 0; j < m_y_max; j++)
             {
-                at_unsafe(i, j) = t[j][i];//Already checked
+                at_unsafe(i, j) = t[j][i]; // Already checked
             }
         }
     }
@@ -169,14 +169,14 @@ public:
             {
                 if (i == j)
                 {
-                    if (at_unsafe(i, j) != one_value)//Already checked
+                    if (at_unsafe(i, j) != one_value) // Already checked
                     {
                         return false;
                     }
                 }
                 else
                 {
-                    if (at_unsafe(i, j) != null_value)//Already checked
+                    if (at_unsafe(i, j) != null_value) // Already checked
                     {
                         return false;
                     }
@@ -192,7 +192,7 @@ public:
         {
             for (size_t j = 0; j < m_y_max; j++)
             {
-                transposed(j, i) = at_unsafe(i, j);//Already checked
+                transposed(j, i) = at_unsafe(i, j); // Already checked
             }
         }
         std::swap(*this, transposed);
@@ -203,7 +203,7 @@ public:
         m.fill(0);
         for (size_t i = 0; i < n; i++)
         {
-            m(i, i) = 1;
+            m.at_unsafe(i, i) = 1; // Already checked
         }
         return m;
     }
@@ -218,7 +218,7 @@ public:
         {
             throw Error { Error::Type::too_small_table_to_fill_the_line };
         }
-        size_t pos = index_of_unsafe(0, y);//We've already check this access
+        size_t pos = index_of_unsafe(0, y); // We've already check this access
         for (int i = 0; i < m_x_max; i++)
         {
             m_data[pos + i] = line[i];
@@ -233,7 +233,7 @@ public:
             std::cout << '|';
             for (size_t i = 0; i < m_x_max; i++)
             {
-                std::cout << m_data[index_of_unsafe(i, j)] << '|';//Access out of bounds is not possible there
+                std::cout << m_data[index_of_unsafe(i, j)] << '|'; // Access out of bounds is not possible there
             }
             std::cout << std::endl;
         }
@@ -446,7 +446,7 @@ private:
                 T sum = 0;
                 for (size_t k = 0; k < m1.m_x_max; k++) // Then we iterate on the x dimension of the first matrix (= the common dimension)
                 {
-                    sum += m1(k, i) * m2(j, k);
+                    sum += m1.at_unsafe(k, i) * m2.at_unsafe(j, k); // Already checked
                 }
                 product(j, i) = sum;
             }
@@ -466,7 +466,7 @@ private:
         for (size_t i = 0; i < m_x_max; i++)
         {
             T temp;
-            temp = at_unsafe(i, l1);//Already checked
+            temp = at_unsafe(i, l1); // Already checked
             at_unsafe(i, l1) = at_unsafe(i, l2);
             at_unsafe(i, l2) = temp;
         }
@@ -515,15 +515,15 @@ private:
                     {
                         continue;
                     }
-                    if (m(j, i) != (T)0 && (m(j, j + 1) / m(j, i) * m(j + 1, i) != m(j + 1, j + 1))) // if we wont make the future pivot be null
-                    {
+                    if (m.at_unsafe(j, i) != (T)0 && (m.at_unsafe(j, j + 1) / m.at_unsafe(j, i) * m.at_unsafe(j + 1, i) != m.at_unsafe(j + 1, j + 1))) // if we wont make the future pivot be null
+                    {                                                                                                                                  // Already checked access
                         m.exchange_line(i, j);
                         s.exchange_line(i, j);
                         break;
                     }
                 }
             }
-            T const pivot = m(j, j);
+            T const pivot = m.at_unsafe(j, j); // Already checked
             if (pivot != (T)0)
             {
                 if (pivot != (T)1)
@@ -533,7 +533,7 @@ private:
                 }
                 for (size_t k = j + 1; k < m.m_y_max; k++)
                 {
-                    T coef = m(j, k) / m(j, j);
+                    T coef = m.at_unsafe(j, k) / m.at_unsafe(j, j); // Already checked
                     m.substract_line(k, j, coef);
                     s.substract_line(k, j, coef);
                 }
@@ -546,15 +546,15 @@ private:
         // Then we make the matrix have only 1 in his diagonal
         for (size_t j = 0; j < m.m_y_max; j++)
         {
-            m.divide_line(j, m(j, j));
-            s.divide_line(j, m(j, j));
+            m.divide_line(j, m.at_unsafe(j, j)); // Already checked
+            s.divide_line(j, m.at_unsafe(j, j));
         }
         // Then we make the matrix be the identity
         for (size_t j = m.m_y_max - 2; j != (size_t)-1; j--)
         {
             for (size_t k = j; k < m.m_x_max - 1; k++)
             {
-                T coef = m(k + 1, j);
+                T coef = m.at_unsafe(k + 1, j); // Already checked
                 m.substract_line(j, k + 1, coef);
                 s.substract_line(j, k + 1, coef);
             }
