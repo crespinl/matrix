@@ -448,7 +448,7 @@ private:
                 {
                     sum += m1.at_unsafe(k, i) * m2.at_unsafe(j, k); // Already checked
                 }
-                product(j, i) = sum;
+                product.at_unsafe(j, i) = sum; // Already checked
             }
         }
         return product;
