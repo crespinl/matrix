@@ -102,7 +102,6 @@ public:
                     actual_small_khi2_consecutive_changes++;
                     if (actual_small_khi2_consecutive_changes > max_small_khi2_consecutive_changes)
                     {
-                        std::cout << "stoping at iteration " << i << std::endl;
                         break;
                     }
                 }
