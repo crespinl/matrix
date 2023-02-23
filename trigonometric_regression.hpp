@@ -73,11 +73,13 @@ public:
         T const initial_lambda = 0.01;
         T const lambda_step = 10;
         T const stop_condition = std::numeric_limits<T>::epsilon(); // If the khi2 of the model is smaller than stop_condition, we stop iterating
+        int const max_small_khi2_consecutive_changes = 5;
         auto p = initials_parameters();
         try
         {
             T current_khi2 = khi2(p);
             T lambda = initial_lambda;
+            int actual_small_khi2_consecutive_changes = 0;
             for (size_t i = 0; i < max_iter; i++)
             {
                 auto j = compute_jacobian_matrix(p);
@@ -95,6 +97,15 @@ public:
 
                 auto new_p = p - delta;
                 T new_khi2 = khi2(new_p);
+                if (std::abs(new_khi2 - current_khi2) < stop_condition)
+                {
+                    actual_small_khi2_consecutive_changes++;
+                    if (actual_small_khi2_consecutive_changes > max_small_khi2_consecutive_changes)
+                    {
+                        std::cout << "stoping at iteration " << i << std::endl;
+                        break;
+                    }
+                }
                 if (new_khi2 < current_khi2) // We have made progress
                 {
                     p = new_p;
@@ -126,8 +137,8 @@ public:
         tr.calculate_model();
         TrigonometricRegression<long double> tr2 { std::vector<Coordinate<long double>> { { 0, 0 }, { 1., 0.8 }, { 3., 0.14 }, { 4., -0.75 } } };
         tr2.calculate_model();
-        TrigonometricRegression<long double> tr3 { std::vector<Coordinate<long double>> { { 0, 2.9 }, { 6, 2.29 }, { 12, 0.01 }, { 18, -2.28 }, { 24, -2.9 }, { 36, 1.19 }, { 48, 2.41 }, { 60, -2.15 }, {64, -2.91} } };
-        tr3.guess_parameters({}, {}, {2}, {});
+        TrigonometricRegression<long double> tr3 { std::vector<Coordinate<long double>> { { 0, 2.9 }, { 6, 2.29 }, { 12, 0.01 }, { 18, -2.28 }, { 24, -2.9 }, { 36, 1.19 }, { 48, 2.41 }, { 60, -2.15 }, { 64, -2.91 } } };
+        tr3.guess_parameters({}, {}, { 2 }, {});
         tr3.calculate_model();
         // Since the values in itselves are not very precise, the tests are quite inprecise
         assert_true(std::abs(tr.a() - 1.00134) < 0.001, "TrigonometricRegression is broken"); // All parameters depends on each other, so testing one should be enough
