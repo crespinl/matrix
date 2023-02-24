@@ -30,7 +30,7 @@ set(HEADERS
     matrix.hpp
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fdiagnostics-color=always")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fdiagnostics-color=always")# -O3 -march=native -mfpmath=sse -funroll-loops
 add_executable(matrix ${SRCS} main.cpp ${HEADERS})
 
 project(matrix_lib)

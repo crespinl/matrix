@@ -34,8 +34,30 @@ SPDX itentifier : GPL-3.0-or-later
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <chrono>
 using namespace std;
 using namespace matrix;
+
+void speed_test()
+{
+    vector<Coordinate<long double>> coordinates;
+    auto model = [](long double x) -> long double { return 10. / (1 + 15. * exp(-5. * x)); };
+    for (int i = 0; i < 300; i++)
+    {
+        coordinates.push_back({ (long double)i, model(i) });
+    }
+    chrono::high_resolution_clock::time_point a;
+    chrono::high_resolution_clock::time_point b;
+    a = chrono::high_resolution_clock::now();
+    LogisticRegression<long double> test1 { coordinates };
+    test1.calculate_model();
+    b = chrono::high_resolution_clock::now();
+    cout << test1.a() << endl;
+    cout << test1.b() << endl;
+    cout << test1.c() << endl;
+    cout << test1.stats().r2 << endl;
+    cout << "Duration in milliseconds : " << chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << endl;
+}
 
 int main()
 {
@@ -54,6 +76,8 @@ int main()
     TrigonometricRegression<int>::Assert(nb_success, nb_test);
     LogisticRegression<int>::Assert(nb_success, nb_test);
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
+
+    speed_test();
 
     return 0;
 }
