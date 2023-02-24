@@ -31,12 +31,17 @@ class LMRegression : public Regression<T>
 public:
     LMRegression(std::vector<Coordinate<T>> const& data)
         : Regression<T>(data)
+        , m_max_iter(300)
     { }
+
+    void set_max_iter(size_t max_iter = 300)
+    {
+        m_max_iter = max_iter;
+    }
 
     void calculate_model() override
     {
         // This is the Levenberg-Marquardt algorithm
-        size_t const max_iter = 300;
         T const initial_lambda = 0.01;
         T const lambda_step = 10;
         T const stop_condition = std::numeric_limits<T>::epsilon(); // If the khi2 of the model is smaller than stop_condition, we stop iterating
@@ -47,7 +52,7 @@ public:
             T current_khi2 = khi2(p);
             T lambda = initial_lambda;
             int actual_small_khi2_consecutive_changes = 0;
-            for (size_t i = 0; i < max_iter; i++)
+            for (size_t i = 0; i < m_max_iter; i++)
             {
                 auto j = compute_jacobian_matrix(p);
                 auto j_t = j;
@@ -134,5 +139,6 @@ private:
     {
         return this->sum_with_operation([&](Coordinate<T> const& c) { return std::pow(c.y() - predict_generic(p, c.x()), 2); });
     }
+    size_t m_max_iter;
 };
 }
