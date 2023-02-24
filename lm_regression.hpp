@@ -99,7 +99,6 @@ public:
     static void Assert(int& nb_success, int& nb_test)
     {
         CREATE_ASSERT_TRUE
-        
     }
 
 private:
@@ -116,7 +115,7 @@ private:
         }
         return r;
     }
-    static Matrix<T> diag(Matrix<T> const& m) // returns the diagonal coefficients of the matrix
+    virtual Matrix<T> diag(Matrix<T> const& m) const
     {
         if (!m.is_square())
         {
