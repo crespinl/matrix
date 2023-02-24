@@ -23,6 +23,7 @@ SPDX itentifier : GPL-3.0-or-later
 #include "fourier.hpp"
 #include "linear_regression.hpp"
 #include "logarithmic_regression.hpp"
+#include "logistic_regression.hpp"
 #include "matrix.hpp"
 #include "polynomial_regression.hpp"
 #include "power_regression.hpp"
@@ -51,6 +52,7 @@ int main()
     PowerRegression<int>::Assert(nb_success, nb_test);
     matrix::Fourier::Assert(nb_success, nb_test);
     TrigonometricRegression<int>::Assert(nb_success, nb_test);
+    LogisticRegression<int>::Assert(nb_success, nb_test);
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
 
     return 0;
