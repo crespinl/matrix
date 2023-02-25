@@ -70,6 +70,10 @@ char const* Error::what() const throw()
     {
         return "The matrix must be square !";
     }
+    case Error::Type::table_size_not_valid_for_matrix_instantiation :
+    {
+        return "Table size not valid for matrix instantiation (Your rows probably doesn't have the same lenght)";
+    }
     default:
     {
         return "Unknown error";

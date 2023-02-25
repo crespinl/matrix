@@ -38,6 +38,7 @@ public:
         polynomial_regression_call_calculate_model,
         wrong_number_of_arguments_in_predict,
         matrix_must_be_square,
+        table_size_not_valid_for_matrix_instantiation,
     };
     Error(Type t);
     char const* what() const throw() override;

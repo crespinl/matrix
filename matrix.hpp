@@ -69,6 +69,27 @@ public:
         {
             for (size_t j = 0; j < m_y_max; j++)
             {
+                if (t[j].size() <= i)
+                {
+                    throw Error(Error::Type::table_size_not_valid_for_matrix_instantiation);
+                }
+                at_unsafe(i, j) = t[j][i]; // Already checked
+            }
+        }
+    }
+    Matrix(std::vector<std::vector<T>> const& t)
+        : m_data(t[0].size() * t.size())
+        , m_x_max(t[0].size())
+        , m_y_max(t.size())
+    {
+        for (size_t i = 0; i < m_x_max; i++)
+        {
+            for (size_t j = 0; j < m_y_max; j++)
+            {
+                if (t[j].size() <= i)
+                {
+                    throw Error(Error::Type::table_size_not_valid_for_matrix_instantiation);
+                }
                 at_unsafe(i, j) = t[j][i]; // Already checked
             }
         }
@@ -79,7 +100,7 @@ public:
         , m_x_max(std::move(other.m_x_max))
         , m_y_max(std::move(other.m_y_max))
     { }
-    void fill(T const& value) // O (n*m)static_cast<size_t>(t.size());
+    void fill(T const& value) // O (n*m)
     {
         for (size_t i = 0; i < m_x_max * m_y_max; i++)
         {
@@ -332,8 +353,7 @@ public:
             { 1, 3, 2, 4 } } };
         bigger_matrix_to_inverse.inverse();
 
-        Matrix<long double> bigger_inversed_matrix { std::vector<std::vector<long double>> {
-            { -21. / 32., 1. / 32., 1. / 8., 3. / 8. },
+        Matrix<long double> bigger_inversed_matrix { { { -21. / 32., 1. / 32., 1. / 8., 3. / 8. },
             { 33. / 32., -29. / 32., 3. / 8., 1. / 8. },
             { 65. / 32., -29. / 32., 3. / 8., -7 / 8. },
             { -13. / 8., 9. / 8., -1. / 2., 1. / 2. } } };
