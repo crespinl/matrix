@@ -10,6 +10,7 @@ set(SRCS
 )
     
 set(HEADERS
+    gaussian_regression.hpp
     logistic_regression.hpp
     lm_regression.hpp
     trigonometric_regression.hpp

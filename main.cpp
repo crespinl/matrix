@@ -21,6 +21,7 @@ SPDX itentifier : GPL-3.0-or-later
 #include "exponential_regression.hpp"
 #include "exponential_regression_2.hpp"
 #include "fourier.hpp"
+#include "gaussian_regression.hpp"
 #include "linear_regression.hpp"
 #include "logarithmic_regression.hpp"
 #include "logistic_regression.hpp"
@@ -34,7 +35,6 @@ SPDX itentifier : GPL-3.0-or-later
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <chrono>
 using namespace std;
 using namespace matrix;
 
@@ -75,6 +75,7 @@ int main()
     matrix::Fourier::Assert(nb_success, nb_test);
     TrigonometricRegression<int>::Assert(nb_success, nb_test);
     LogisticRegression<int>::Assert(nb_success, nb_test);
+    GaussianRegression<int>::Assert(nb_success, nb_test);
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
 
     speed_test();
