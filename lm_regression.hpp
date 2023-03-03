@@ -45,7 +45,7 @@ public:
         T const initial_lambda = 0.01;
         T const lambda_step = 10;
         T const stop_condition = std::numeric_limits<T>::epsilon(); // If the khi2 of the model is smaller than stop_condition, we stop iterating
-        int const max_small_khi2_consecutive_changes = 5;
+        int const max_small_khi2_consecutive_changes = 3;
         auto p = initials_parameters();
         try
         {
@@ -76,6 +76,10 @@ public:
                     {
                         break;
                     }
+                }
+                else
+                {
+                    actual_small_khi2_consecutive_changes = 0;
                 }
                 if (new_khi2 < current_khi2) // We have made progress
                 {
