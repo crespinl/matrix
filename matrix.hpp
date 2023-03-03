@@ -459,16 +459,18 @@ private:
             throw Error { Error::Type::multiply_matrix_size_not_compatible };
         }
         Matrix<T> product { m2.m_x_max, m1.m_y_max };
-        for (size_t i = 0; i < m1.m_y_max; i++) // We firstly iterate on the y dimension of the first matrix
+        size_t i, j, k;
+#ifdef USE_OPENMP
+#    pragma omp parallel for private(i, j, k) shared(product, m1, m2)
+#endif
+        for (i = 0; i < m1.m_y_max; i++) // We firstly iterate on the y dimension of the first matrix
         {
-            for (size_t j = 0; j < m2.m_x_max; j++) // We secondly iterate on the x dimension on the second matrix
+            for (k = 0; k < m1.m_x_max; k++) // We secondly iterate on the x dimension of the first matrix (= the common dimension)
             {
-                T sum = 0;
-                for (size_t k = 0; k < m1.m_x_max; k++) // Then we iterate on the x dimension of the first matrix (= the common dimension)
+                for (j = 0; j < m2.m_x_max; j++) // Then we iterate on the x dimension on the second matrix
                 {
-                    sum += m1.at_unsafe(k, i) * m2.at_unsafe(j, k); // Already checked
+                    product.at_unsafe(j, i) += m1.at_unsafe(k, i) * m2.at_unsafe(j, k); // Already checked
                 }
-                product.at_unsafe(j, i) = sum; // Already checked
             }
         }
         return product;
@@ -525,11 +527,12 @@ private:
     {
         Matrix<T> s = get_identity(m.m_x_max);
         // The idea is to apply always the same changes to the identity matrix to get from it the inverse at the end
-        for (size_t j = 0; j < m.m_y_max; j++) // We transform the matrix into a triangular matrix
+        size_t i, j, k;
+        for (j = 0; j < m.m_y_max; j++) // We transform the matrix into a triangular matrix
         {
             if (j != m.m_y_max - 1)
             {
-                for (size_t i = j; i < m.m_y_max; i++)
+                for (i = j; i < m.m_y_max; i++)
                 {
                     if (i == j + 1)
                     {
@@ -551,7 +554,7 @@ private:
                     m.divide_line(j, pivot);
                     s.divide_line(j, pivot);
                 }
-                for (size_t k = j + 1; k < m.m_y_max; k++)
+                for (k = j + 1; k < m.m_y_max; k++)
                 {
                     T coef = m.at_unsafe(j, k) / m.at_unsafe(j, j); // Already checked
                     m.substract_line(k, j, coef);
@@ -564,15 +567,15 @@ private:
             }
         }
         // Then we make the matrix have only 1 in his diagonal
-        for (size_t j = 0; j < m.m_y_max; j++)
+        for (j = 0; j < m.m_y_max; j++)
         {
             m.divide_line(j, m.at_unsafe(j, j)); // Already checked
             s.divide_line(j, m.at_unsafe(j, j));
         }
         // Then we make the matrix be the identity
-        for (size_t j = m.m_y_max - 2; j != (size_t)-1; j--)
+        for (j = m.m_y_max - 2; j != (size_t)-1; j--)
         {
-            for (size_t k = j; k < m.m_x_max - 1; k++)
+            for (k = j; k < m.m_x_max - 1; k++)
             {
                 T coef = m.at_unsafe(k + 1, j); // Already checked
                 m.substract_line(j, k + 1, coef);

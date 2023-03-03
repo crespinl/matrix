@@ -56,7 +56,13 @@ void speed_test()
     cout << test1.b() << endl;
     cout << test1.c() << endl;
     cout << test1.stats().r2 << endl;
-    cout << "Duration in milliseconds : " << chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << endl;
+    cout << "Duration of logistic regression in milliseconds : " << chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << endl;
+    Matrix<long double> m1(4096);
+    Matrix<long double> m2(4096);
+    a = chrono::high_resolution_clock::now();
+    m1 *= m2;
+    b = chrono::high_resolution_clock::now();
+    cout << "Duration of matrix multiplication in milliseconds : " << chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << endl;
 }
 
 int main()
