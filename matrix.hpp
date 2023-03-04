@@ -178,8 +178,8 @@ public:
     }
     bool is_identity() const // O (n*m)
     {
-        T null_value = (T)0;
-        T one_value = (T)1;
+        T const null_value = (T)0;
+        T const one_value = (T)1;
         if (!is_square())
         {
             return false;
@@ -209,9 +209,13 @@ public:
     void transpose() // O (n*m)
     {
         auto transposed = Matrix<T> { m_y_max, m_x_max };
-        for (size_t i = 0; i < m_x_max; i++)
+        size_t i, j;
+#ifdef USE_OPENMP
+#    pragma omp parallel for private(i, j) shared(transposed)
+#endif
+        for (i = 0; i < m_x_max; i++)
         {
-            for (size_t j = 0; j < m_y_max; j++)
+            for (j = 0; j < m_y_max; j++)
             {
                 transposed.at_unsafe(j, i) = at_unsafe(i, j); // Already checked
             }
@@ -423,6 +427,9 @@ private:
             throw Error { Error::Type::add_substract_matrix_size_not_compatible };
         }
         Matrix<T> sum { m1.m_x_max, m1.m_y_max };
+#ifdef USE_OPENMP
+#    pragma omp parallel for
+#endif
         for (size_t i = 0; i < m1.m_data.size(); i++)
         {
             sum.m_data[i] = m1.m_data[i] + m2.m_data[i];
@@ -436,6 +443,9 @@ private:
             throw Error { Error::Type::add_substract_matrix_size_not_compatible };
         }
         Matrix<T> sub { m1.m_x_max, m1.m_y_max };
+#ifdef USE_OPENMP
+#    pragma omp parallel for
+#endif
         for (size_t i = 0; i < m1.m_data.size(); i++)
         {
             sub.m_data[i] = m1.m_data[i] - m2.m_data[i];
@@ -445,6 +455,9 @@ private:
     static Matrix<T> multiply_constant(Matrix<T> const& m, T const& value) // O(n*m)
     {
         Matrix<T> product { m.m_x_max, m.m_y_max };
+#ifdef USE_OPENMP
+#    pragma omp parallel for
+#endif
         for (size_t i = 0; i < m.m_data.size(); i++)
         {
             product.m_data[i] = m.m_data[i] * value;
@@ -518,6 +531,9 @@ private:
         {
             return;
         }
+#ifdef USE_OPENMP
+#    pragma omp parallel for
+#endif
         for (size_t i = 0; i < m_x_max; i++)
         {
             at_unsafe(i, l1) /= value;
@@ -554,6 +570,9 @@ private:
                     m.divide_line(j, pivot);
                     s.divide_line(j, pivot);
                 }
+#ifdef USE_OPENMP
+#    pragma omp parallel for
+#endif
                 for (k = j + 1; k < m.m_y_max; k++)
                 {
                     T coef = m.at_unsafe(j, k) / m.at_unsafe(j, j); // Already checked
@@ -566,14 +585,15 @@ private:
                 throw Error { Error::Type::matrix_not_inversible };
             }
         }
-        // Then we make the matrix have only 1 in his diagonal
-        for (j = 0; j < m.m_y_max; j++)
+#ifdef USE_OPENMP
+#    pragma omp parallel for
+#endif
+        for (j = 0; j < m.m_y_max; j++) // Then we make the matrix have only 1 in his diagonal
         {
             m.divide_line(j, m.at_unsafe(j, j)); // Already checked
             s.divide_line(j, m.at_unsafe(j, j));
         }
-        // Then we make the matrix be the identity
-        for (j = m.m_y_max - 2; j != (size_t)-1; j--)
+        for (j = m.m_y_max - 2; j != (size_t)-1; j--) // Then we make the matrix be the identity
         {
             for (k = j; k < m.m_x_max - 1; k++)
             {
