@@ -263,6 +263,30 @@ public:
             std::cout << std::endl;
         }
     }
+    Matrix<T> minor_matrix_at_index(size_t index) const // Usefull to run testcases
+    {
+        if (m_x_max != m_y_max)
+        {
+            throw Error { Error::Type::matrix_must_be_square };
+        }
+        if (index > m_x_max)
+        {
+            throw Error { Error::Type::access_out_of_range };
+        }
+        return get_minor_matrix_at_index(index);
+    }
+    T determinant() const
+    {
+        if (m_x_max != m_y_max)
+        {
+            throw Error { Error::Type::matrix_must_be_square };
+        }
+        return get_determinant(*this);
+    }
+    bool is_inversible() const
+    {
+        return determinant() != 0;
+    }
     static void Assert(int& nb_success, int& nb_test)
     {
         CREATE_ASSERT_TRUE
@@ -365,6 +389,12 @@ public:
             { 1, 2, 3 },
             { 4, 5, 6 },
             { 7, 8, 9 } } };
+        Matrix<long double> minor_matrix_result { { { 4, 6 },
+            { 7, 9 } } };
+        Matrix<long double> determinant { std::vector<std::vector<long double>> {
+            { 1, 2, 3 },
+            { 4, 5, 6 },
+            { 8, 7, 9 } } };
 
         assert_true(matrix1 == matrix2, "Two equals matrix are not considered as equal");
         assert_true(matrix1 != matrix3, "Two different matrix are considered as equal");
@@ -381,6 +411,10 @@ public:
         assert_true(matrix_to_inverse == inversed_matrix, "Matrix inversion fails");
         assert_true(bigger_matrix_to_inverse == bigger_inversed_matrix, "Matrix inversion fails");
         ASSERT_THROWS(not_inversible_matrix.inverse(), "Inversion of a not inversable matrix doesn't throws");
+        assert_true(not_inversible_matrix.minor_matrix_at_index(1) == minor_matrix_result, "minor_matrix_at_index is broken");
+        assert_true(not_inversible_matrix.determinant() == 0., "Not inversible_matrix does not has a null determinant");
+        assert_true(determinant.determinant() == -9., "Determinant is broken");
+        assert_true(!not_inversible_matrix.is_inversible(), "Not inversible matrix detected as inversible");
 
 #undef ASSERT_THROWS
     }
@@ -603,6 +637,65 @@ private:
             }
         }
         return s;
+    }
+    // This is private so it can be unsafe. It makes the assumption that the matrix is square, that i is not out of range and that the size is miminum 2*2
+    Matrix<T> get_minor_matrix_at_index(size_t index) const
+    {
+        Matrix<T> minor { m_x_max - 1 };
+        size_t i;
+        for (i = 0; i < index; i++)
+        {
+            for (size_t j = 1; j < m_y_max; j++)
+            {
+                minor.at_unsafe(i, j - 1) = at_unsafe(i, j);
+            }
+        }
+        i++;
+        for (; i < m_x_max; i++)
+        {
+            for (size_t j = 1; j < m_y_max; j++)
+            {
+                minor.at_unsafe(i - 1, j - 1) = at_unsafe(i, j);
+            }
+        }
+        return minor;
+    }
+    static T get_determinant(Matrix<T> const& m)//this is O(n!)...
+    {
+        T det;
+        if (m.m_x_max == 1)
+        {
+            det = m.at_unsafe(0, 0);
+        }
+        else if (m.m_x_max == 2)
+        {
+            det = m.at_unsafe(0, 0) * m.at_unsafe(1, 1) - m.at_unsafe(0, 1) * m.at_unsafe(1, 0);
+        }
+        else if (m.m_x_max == 3)
+        {
+            T const a = m.at_unsafe(0, 0);
+            T const b = m.at_unsafe(1, 0);
+            T const c = m.at_unsafe(2, 0);
+            T const d = m.at_unsafe(0, 1);
+            T const e = m.at_unsafe(1, 1);
+            T const f = m.at_unsafe(2, 1);
+            T const g = m.at_unsafe(0, 2);
+            T const h = m.at_unsafe(1, 2);
+            T const i = m.at_unsafe(2, 2);
+
+            det = (a * e * i) - (a * f * h) + (b * f * g) - (b * d * i) + (c * d * h) - (c * e * g);
+        }
+        else
+        {
+            int sign = 1;
+            det = 0;
+            for (size_t i = 0; i < m.m_x_max; i++)
+            {
+                det += sign * m.at_unsafe(i, 0) * m.get_minor_matrix_at_index(i).determinant();
+                sign = -sign;
+            }
+        }
+        return det;
     }
     std::vector<T> m_data;
     size_t m_x_max;
