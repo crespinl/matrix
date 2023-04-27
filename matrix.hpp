@@ -133,20 +133,30 @@ public:
     }
     Matrix<T>& operator=(Matrix<T>&&) = default;
 
-    template<NumberConcept P>
-    friend Matrix<P> operator+(Matrix<P> const& m1, Matrix<P> const& m2);
+    friend inline Matrix<T> operator+(Matrix<T> const& m1, Matrix<T> const& m2)
+    {
+        return Matrix<T>::add(m1, m2);
+    }
 
-    template<NumberConcept P>
-    friend Matrix<P> operator-(Matrix<P> const& m1, Matrix<P> const& m2);
+    friend inline Matrix<T> operator-(Matrix<T> const& m1, Matrix<T> const& m2)
+    {
+        return Matrix<T>::substract(m1, m2);
+    }
 
-    template<NumberConcept P>
-    friend Matrix<P> operator*(Matrix<P> const& m1, Matrix<P> const& m2);
+    friend inline Matrix<T> operator*(Matrix<T> const& m1, Matrix<T> const& m2)
+    {
+        return Matrix<T>::multiply_matrix(m1, m2);
+    }
 
-    template<NumberConcept P>
-    friend Matrix<P> operator*(Matrix<P> const& m, P const& value);
+    friend inline Matrix<T> operator*(Matrix<T> const& m, T const& value)
+    {
+        return Matrix<T>::multiply_constant(m, value);
+    }
 
-    template<NumberConcept P>
-    friend Matrix<P> operator*(P const& value, Matrix<P> const& m);
+    friend inline Matrix<T> operator*(T const& value, Matrix<T> const& m)
+    {
+        return Matrix<T>::multiply_constant(m, value);
+    }
 
     Matrix<T>& operator+=(Matrix<T> const& other)
     {
@@ -510,11 +520,11 @@ private:
 #ifdef USE_OPENMP
 #    pragma omp parallel for private(i, j, k) shared(product, m1, m2)
 #endif
-        for (i = 0; i < m1.m_y_max; i++) // We firstly iterate on the y dimension of the first matrix
+        for (i = 0; i < m1.m_y_max; i++)                                                // We firstly iterate on the y dimension of the first matrix
         {
-            for (k = 0; k < m1.m_x_max; k++) // We secondly iterate on the x dimension of the first matrix (= the common dimension)
+            for (k = 0; k < m1.m_x_max; k++)                                            // We secondly iterate on the x dimension of the first matrix (= the common dimension)
             {
-                for (j = 0; j < m2.m_x_max; j++) // Then we iterate on the x dimension on the second matrix
+                for (j = 0; j < m2.m_x_max; j++)                                        // Then we iterate on the x dimension on the second matrix
                 {
                     product.at_unsafe(j, i) += m1.at_unsafe(k, i) * m2.at_unsafe(j, k); // Already checked
                 }
@@ -622,7 +632,7 @@ private:
 #ifdef USE_OPENMP
 #    pragma omp parallel for
 #endif
-        for (j = 0; j < m.m_y_max; j++) // Then we make the matrix have only 1 in his diagonal
+        for (j = 0; j < m.m_y_max; j++)          // Then we make the matrix have only 1 in his diagonal
         {
             m.divide_line(j, m.at_unsafe(j, j)); // Already checked
             s.divide_line(j, m.at_unsafe(j, j));
@@ -660,7 +670,7 @@ private:
         }
         return minor;
     }
-    static T get_determinant(Matrix<T> const& m)//this is O(n!)...
+    static T get_determinant(Matrix<T> const& m) // this is O(n!)...
     {
         T det;
         if (m.m_x_max == 1)
@@ -701,30 +711,4 @@ private:
     size_t m_x_max;
     size_t m_y_max;
 };
-
-template<NumberConcept T>
-Matrix<T> inline operator+(Matrix<T> const& m1, Matrix<T> const& m2)
-{
-    return Matrix<T>::add(m1, m2);
-}
-template<NumberConcept T>
-Matrix<T> inline operator-(Matrix<T> const& m1, Matrix<T> const& m2)
-{
-    return Matrix<T>::substract(m1, m2);
-}
-template<NumberConcept T>
-Matrix<T> inline operator*(Matrix<T> const& m1, Matrix<T> const& m2)
-{
-    return Matrix<T>::multiply_matrix(m1, m2);
-}
-template<NumberConcept T>
-Matrix<T> inline operator*(Matrix<T> const& m, T const& value)
-{
-    return Matrix<T>::multiply_constant(m, value);
-}
-template<NumberConcept T>
-Matrix<T> inline operator*(T const& value, Matrix<T> const& m)
-{
-    return Matrix<T>::multiply_constant(m, value);
-}
 }
