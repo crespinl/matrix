@@ -19,6 +19,8 @@ SPDX itentifier : GPL-3.0-or-later
 */
 #pragma once
 #include "lm_regression.hpp"
+#include <chrono>
+#include <random>
 namespace matrix
 {
 template<NumberConcept T>
@@ -32,7 +34,10 @@ public:
         , m_b(0)
         , m_c(0)
         , m_d(0)
-    { }
+    {
+        std::sort(this->m_data.begin(), this->m_data.end(), [](Coordinate<T> const& c1, Coordinate<T> const& c2) { return c1.x() < c2.x(); });
+        // Points need to be sorted here for the approximation algorithm
+    }
 
     virtual T predict(T const& v) const override
     {
@@ -80,6 +85,33 @@ public:
         assert_true(std::abs(tr3.b() - 0.148) < 0.02, "Values not precise in TrigonometricRegression (test 3)");
         assert_true(tr3.stats().r2 > 0.999, "The R2 should be bigger in TrigonometricRegression (test 3)");
     }
+    static void fuzzer()
+    {
+        long double a = 1;
+        long double b = 0.3;
+        long double c = 3;
+        long double d = 4;
+        int const n = 50;
+        long double const min = 0;
+        long double const max = 20;
+        std::vector<Coordinate<long double>> points;
+        points.reserve(n);
+        std::default_random_engine re { (long unsigned int) std::chrono::system_clock::now().time_since_epoch().count() };
+        std::uniform_real_distribution<long double> generator(min, max);
+        auto func = [a, b, c, d](long double v) { return a * std::sin(b * v + c) + d; };
+        for (size_t i = 0; i < n; i++)
+        {
+            long double v = generator(re);
+            points.push_back({ v, func(v) });
+        }
+        TrigonometricRegression<long double> regression { points };
+        regression.calculate_model();
+        std::cout << "a : used " << a << " and calculated " << regression.a() << std::endl;
+        std::cout << "b : used " << b << " and calculated " << regression.b() << std::endl;
+        std::cout << "c : used " << c << " and calculated " << regression.c() << std::endl;
+        std::cout << "d : used " << d << " and calculated " << regression.d() << std::endl;
+        std::cout << "Got a R2 of " << regression.stats().r2 << std::endl;
+    }
 
 private:
     virtual void apply(Matrix<T> const& p) override
@@ -95,29 +127,28 @@ private:
         std::optional<T> b = m_approx_b;
         std::optional<T> c = m_approx_c;
         std::optional<T> d = m_approx_d;
-        // First, we try to fill missings data by finding maxima or minima, wich is more precise but can fail
-        initials_parameters_with_max_or_min(a, b, c, d);
-        size_t n = this->m_data.size();
-        // Then, we use more conventional methods
-        if (!d)
+        // Normally, we use the integral equation method, wich is verry precise but can fail
+        if (!initials_parameters_with_integral_equation(a, b, c, d))
         {
-            d = this->sum_with_operation([](Coordinate<T> const& c) { return c.y(); }) / n;
-        }
-        if (!a) // a is supposed to be near the abs of the greatest y - the y mean
-        {
-            a = 0;
-            for (size_t i = 0; i < n; i++)
+            // If it didn't work, we use easier methods
+            initials_parameters_with_max_or_min(a, b, c, d);
+            size_t n = this->m_data.size();
+            if (!d)
             {
-                T abs = std::abs(this->m_data[i].y() - d.value());
-                if (abs > a)
+                d = this->sum_with_operation([](Coordinate<T> const& c) { return c.y(); }) / n;
+            }
+            if (!a) // a is supposed to be near the abs of the greatest y - the y mean
+            {
+                a = 0;
+                for (size_t i = 0; i < n; i++)
                 {
-                    a = abs;
+                    T abs = std::abs(this->m_data[i].y() - d.value());
+                    if (abs > a)
+                    {
+                        a = abs;
+                    }
                 }
             }
-        }
-        if (c.has_value())
-        {
-            c = mod(c.value(), std::numbers::pi_v<T> * 2); // C is defined %2*pi
         }
         return { std::vector<std::vector<T>> { { a.value() }, { b.value_or(1) }, { c.value_or(1) }, { d.value() } } };
     }
@@ -146,15 +177,121 @@ private:
         }
         return m(0, 0) * std::sin(m(0, 1) * v + m(0, 2)) + m(0, 3);
     }
+
+    bool initials_parameters_with_integral_equation(std::optional<T>& a, std::optional<T>& b, std::optional<T>& c, std::optional<T>& d) const
+    /*
+    This function computes an approximation for the parameters using an algorithm based on integral equations.
+    In does some failible operations, such as matrix inversions, wich means that in can sometimes return false if failed.
+    */
+    {
+        if (a && b && c && d)
+        {
+            return true;
+        }
+        size_t const n = this->m_data.size();
+        if (n < 5)
+        {
+            // If the number of parameters is too small, the precision becomes verry bad, so we prefer to use other methods
+            return false;
+        }
+        std::vector<T> S;
+        S.reserve(n);
+        S.push_back(0);
+        for (size_t i = 1; i < n; i++)
+        {
+            S.push_back(S[i - 1] + 0.5 * (this->m_data[i].y() + this->m_data[i - 1].y()) * (this->m_data[i].x() - this->m_data[i - 1].x()));
+        }
+
+        std::vector<T> SS;
+        SS.reserve(n);
+        SS.push_back(0);
+        for (size_t i = 1; i < n; i++)
+        {
+            SS.push_back(SS[i - 1] + 0.5 * (S[i] + S[i - 1]) * (this->m_data[i].x() - this->m_data[i - 1].x()));
+        }
+
+        // then a little bit of sums ...
+        T x_sum = this->sum_with_operation([](Coordinate<T> const& c) { return c.x(); });
+        T square_x_sum = this->sum_with_operation([](Coordinate<T> const& c) { return std::pow<T>(c.x(), 2); });
+        T power_three_x_sum = this->sum_with_operation([](Coordinate<T> const& c) { return std::pow<T>(c.x(), 3); });
+        T power_four_x_sum = this->sum_with_operation([](Coordinate<T> const& c) { return std::pow<T>(c.x(), 4); });
+        T SS_sum = 0;
+        for (auto const& e : SS)
+        {
+            SS_sum += e;
+        }
+        T square_SS_sum = 0;
+        for (auto const& e : SS)
+        {
+            square_SS_sum += std::pow<T>(e, 2);
+        }
+        T x_times_SS_sum = 0;
+        T y_times_SS_sum = 0;
+        T x_square_times_SS_sum = 0;
+        for (size_t i = 0; i < n; i++)
+        {
+            x_times_SS_sum += this->m_data[i].x() * SS[i];
+            y_times_SS_sum += this->m_data[i].y() * SS[i];
+            x_square_times_SS_sum += std::pow<T>(this->m_data[i].x(), 2) * SS[i];
+        }
+        T y_sum = this->sum_with_operation([](Coordinate<T> const& c) { return c.y(); });
+        T y_times_x_sum = this->sum_with_operation([](Coordinate<T> const& c) { return c.y() * c.x(); });
+        T y_times_square_x_sum = this->sum_with_operation([](Coordinate<T> const& c) { return c.y() * std::pow<T>(c.x(), 2); });
+
+        Matrix<T> m1 { {
+            { square_SS_sum, x_square_times_SS_sum, x_times_SS_sum, SS_sum },
+            { x_square_times_SS_sum, power_four_x_sum, power_three_x_sum, square_x_sum },
+            { x_times_SS_sum, power_three_x_sum, square_x_sum, x_sum },
+            { SS_sum, square_x_sum, x_sum, static_cast<T>(n) },
+        } };
+        Matrix<T> m2 { {
+            { y_times_SS_sum },
+            { y_times_square_x_sum },
+            { y_times_x_sum },
+            { y_sum },
+        } };
+        try
+        {
+            m1.inverse();
+        }
+        catch (...)
+        {
+            return false;
+        }
+        // TODO : check
+        auto result_one = m1 * m2;
+        T omega_1 = std::sqrt(-result_one(0, 0));
+        T a_1 = 2. * result_one(0, 1) / std::pow(omega_1, 2);
+        T x_1 = this->m_data[0].x();
+        T big_calculus_1 = result_one(0, 1) * std::pow(x_1, 2) + result_one(0, 2) * x_1 + result_one(0, 3) - a_1;
+        T big_calculus_2 = (result_one(0, 2) + 2 * result_one(0, 1) * x_1) / omega_1;
+        T big_calculus_3 = omega_1 * x_1;
+        T b_1 = big_calculus_1 * std::sin(big_calculus_3) + big_calculus_2 * std::cos(big_calculus_3);
+        T c_1 = big_calculus_1 * std::cos(big_calculus_3) - big_calculus_2 * std::sin(big_calculus_3);
+
+        T rho_1 = std::sqrt(std::pow(b_1, 2) + std::pow(c_1, 2));
+        T phi_1 = std::acos(b_1 / rho_1);
+
+        if (!a)
+            a = rho_1;
+        if (!b)
+            b = omega_1;
+        if (!c)
+            c = phi_1;
+        if (!d)
+            d = a_1;
+        // Not use the end of the algorithm for now
+        return true;
+    }
+
     void initials_parameters_with_max_or_min(std::optional<T>& a, std::optional<T>& b, std::optional<T>& c, std::optional<T>& d) const
     {
         if (a.has_value() && b.has_value() && c.has_value() && d.has_value())
         {
             return;
         }
-        std::vector<Coordinate<T>> data = this->m_data;
+        std::vector<Coordinate<T>> const& data = this->m_data;
         size_t n = data.size();
-        std::sort(data.begin(), data.end(), [](Coordinate<T> const& c1, Coordinate<T> const& c2) { return c1.x() < c2.x(); });
         long int first = -1;
         bool first_is_maxima = false;
         long int second = -1;
