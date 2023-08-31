@@ -50,18 +50,18 @@ class Matrix
 {
 public:
     Matrix(size_t x_max, size_t y_max)
-        : m_data(x_max * y_max)
+        : m_data(new T[x_max * y_max])
         , m_x_max(x_max)
         , m_y_max(y_max)
     { }
     Matrix(size_t max)
-        : m_data(max * max)
+        : m_data(new T[max * max])
         , m_x_max(max)
         , m_y_max(max)
     { }
     template<DoubleTableConcept DT>
     Matrix(DT const& t)
-        : m_data(t[0].size() * t.size())
+        : m_data(new T[t[0].size() * t.size()])
         , m_x_max(t[0].size())
         , m_y_max(t.size())
     {
@@ -78,7 +78,7 @@ public:
         }
     }
     Matrix(std::vector<std::vector<T>> const& t)
-        : m_data(t[0].size() * t.size())
+        : m_data(new T[t[0].size() * t.size()])
         , m_x_max(t[0].size())
         , m_y_max(t.size())
     {
@@ -94,12 +94,23 @@ public:
             }
         }
     }
-    Matrix(Matrix<T> const&) = default;
+    Matrix(Matrix<T> const& other)
+        : m_data(new T[other.m_data_size()])
+        , m_x_max(other.m_x_max)
+        , m_y_max(other.m_y_max)
+    {
+        for (size_t i = 0; i < m_data_size(); i++)
+        {
+            m_data[i] = other.m_data[i];
+        }
+    }
     Matrix(Matrix<T>&& other)
-        : m_data(std::move(other.m_data))
+        : m_data(other.m_data)
         , m_x_max(std::move(other.m_x_max))
         , m_y_max(std::move(other.m_y_max))
-    { }
+    {
+        other.m_data = nullptr;
+    }
     void fill(T const& value) // O (n*m)
     {
         for (size_t i = 0; i < m_x_max * m_y_max; i++)
@@ -109,7 +120,18 @@ public:
     }
     bool operator==(Matrix const& other) const // O (n*m)
     {
-        return m_x_max == other.m_x_max && m_y_max == other.m_y_max && m_data == other.m_data;
+        if (m_x_max != other.m_x_max || m_y_max != other.m_y_max)
+        {
+            return false;
+        }
+        for (size_t i = 0; i < m_data_size(); i++)
+        {
+            if (m_data[i] != other.m_data[i])
+            {
+                return false;
+            }
+        }
+        return true;
     }
     bool operator!=(Matrix const&) const = default; // O (n*m)
     T& operator()(size_t x, size_t y)
@@ -126,12 +148,36 @@ public:
         {
             return *this;
         }
+        delete[] (m_data);
+        m_data = nullptr;
+        m_x_max = other.m_x_max;
+        m_y_max = other.m_y_max;
+        m_data = new T[m_data_size()];
+        for (size_t i = 0; i < m_data_size(); i++)
+        {
+            m_data[i] = other.m_data[i];
+        }
+        return *this;
+    }
+    Matrix<T>& operator=(Matrix<T>&& other)
+    {
+        delete[] (m_data);
+        m_data = nullptr;
         m_x_max = other.m_x_max;
         m_y_max = other.m_y_max;
         m_data = other.m_data;
+        other.m_data = nullptr;
         return *this;
     }
-    Matrix<T>& operator=(Matrix<T>&&) = default;
+
+    ~Matrix ()
+    {
+        if (m_data != nullptr)
+        {
+            delete[](m_data);
+            m_data = nullptr;
+        }
+    }
 
     friend inline Matrix<T> operator+(Matrix<T> const& m1, Matrix<T> const& m2)
     {
@@ -474,7 +520,7 @@ private:
 #ifdef USE_OPENMP
 #    pragma omp parallel for
 #endif
-        for (size_t i = 0; i < m1.m_data.size(); i++)
+        for (size_t i = 0; i < m1.m_data_size(); i++)
         {
             sum.m_data[i] = m1.m_data[i] + m2.m_data[i];
         }
@@ -490,7 +536,7 @@ private:
 #ifdef USE_OPENMP
 #    pragma omp parallel for
 #endif
-        for (size_t i = 0; i < m1.m_data.size(); i++)
+        for (size_t i = 0; i < m1.m_data_size(); i++)
         {
             sub.m_data[i] = m1.m_data[i] - m2.m_data[i];
         }
@@ -502,7 +548,7 @@ private:
 #ifdef USE_OPENMP
 #    pragma omp parallel for
 #endif
-        for (size_t i = 0; i < m.m_data.size(); i++)
+        for (size_t i = 0; i < m.m_data_size(); i++)
         {
             product.m_data[i] = m.m_data[i] * value;
         }
@@ -516,6 +562,7 @@ private:
             throw Error { Error::Type::multiply_matrix_size_not_compatible };
         }
         Matrix<T> product { m2.m_x_max, m1.m_y_max };
+        product.fill(0);
         size_t i, j, k;
 #ifdef USE_OPENMP
 #    pragma omp parallel for private(i, j, k) shared(product, m1, m2)
@@ -556,9 +603,11 @@ private:
         {
             throw Error { Error::Type::line_number_out_of_range };
         }
+        size_t begin_1 = index_of_unsafe(0, l1);
+        size_t begin_2 = index_of_unsafe(0, l2);
         for (size_t i = 0; i < m_x_max; i++)
         {
-            at_unsafe(i, l1) -= at_unsafe(i, l2) * coef;
+            m_data[begin_1 + i] -= m_data[begin_2 + i] * coef;
         }
     }
     void divide_line(size_t l1, T const& value)
@@ -707,7 +756,11 @@ private:
         }
         return det;
     }
-    std::vector<T> m_data;
+    size_t inline m_data_size() const
+    {
+        return m_x_max * m_y_max;
+    }
+    T* m_data;
     size_t m_x_max;
     size_t m_y_max;
 };
