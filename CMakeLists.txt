@@ -14,6 +14,7 @@ set(HEADERS
     logistic_regression.hpp
     lm_regression.hpp
     trigonometric_regression.hpp
+    damped_trigonometric_regression.hpp
     fourier.hpp
     regression_stats.hpp
     power_regression.hpp

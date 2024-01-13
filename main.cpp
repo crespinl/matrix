@@ -30,6 +30,7 @@ SPDX itentifier : GPL-3.0-or-later
 #include "power_regression.hpp"
 #include "proportional_regression.hpp"
 #include "trigonometric_regression.hpp"
+#include "damped_trigonometric_regression.hpp"
 #include <cassert>
 #include <chrono>
 #include <fstream>
@@ -82,9 +83,10 @@ int main()
     TrigonometricRegression<int>::Assert(nb_success, nb_test);
     LogisticRegression<int>::Assert(nb_success, nb_test);
     GaussianRegression<int>::Assert(nb_success, nb_test);
+    DampedTrigonometricRegression<int>::Assert(nb_success, nb_test);
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
 
-    speed_test();
+    // speed_test();
 
     return 0;
 }
