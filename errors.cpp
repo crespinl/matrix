@@ -42,6 +42,10 @@ char const* Error::what() const throw()
     {
         return "Line number out of range";
     }
+    case Error::Type::row_number_out_of_range:
+    {
+        return "Row number out of range";
+    }
     case Error::Type::divide_by_zero:
     {
         return "Division by zero";

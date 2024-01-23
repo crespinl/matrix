@@ -170,11 +170,11 @@ public:
         return *this;
     }
 
-    ~Matrix ()
+    ~Matrix()
     {
         if (m_data != nullptr)
         {
-            delete[](m_data);
+            delete[] (m_data);
             m_data = nullptr;
         }
     }
@@ -567,17 +567,35 @@ private:
 #ifdef USE_OPENMP
 #    pragma omp parallel for private(i, j, k) shared(product, m1, m2)
 #endif
-        for (i = 0; i < m1.m_y_max; i++)                                                // We firstly iterate on the y dimension of the first matrix
+        for (i = 0; i < m1.m_y_max; i++) // We firstly iterate on the y dimension of the first matrix
         {
-            for (k = 0; k < m1.m_x_max; k++)                                            // We secondly iterate on the x dimension of the first matrix (= the common dimension)
+            for (k = 0; k < m1.m_x_max; k++) // We secondly iterate on the x dimension of the first matrix (= the common dimension)
             {
-                for (j = 0; j < m2.m_x_max; j++)                                        // Then we iterate on the x dimension on the second matrix
+                for (j = 0; j < m2.m_x_max; j++) // Then we iterate on the x dimension on the second matrix
                 {
                     product.at_unsafe(j, i) += m1.at_unsafe(k, i) * m2.at_unsafe(j, k); // Already checked
                 }
             }
         }
         return product;
+    }
+    void exchange_row(size_t r1, size_t r2) // O(n)
+    {
+        if (r1 >= m_x_max || r2 >= m_x_max)
+        {
+            throw Error { Error::Type::row_number_out_of_range };
+        }
+        if (r1 == r2)
+        {
+            return;
+        }
+        for (size_t j = 0; j < m_y_max; j++)
+        {
+            T temp;
+            temp = at_unsafe(r1, j); // Already checked
+            at_unsafe(r1, j) = at_unsafe(r2, j);
+            at_unsafe(r2, j) = temp;
+        }
     }
     void exchange_line(size_t l1, size_t l2) // O(n)
     {
@@ -603,9 +621,9 @@ private:
         {
             throw Error { Error::Type::line_number_out_of_range };
         }
-        size_t begin_1 = index_of_unsafe(0, l1);
-        size_t begin_2 = index_of_unsafe(0, l2);
-        for (size_t i = 0; i < m_x_max; i++)
+        size_t const begin_1 = index_of_unsafe(0, l1);
+        size_t const begin_2 = index_of_unsafe(0, l2);
+        for (size_t i = 0; i < m_x_max; ++i)
         {
             m_data[begin_1 + i] -= m_data[begin_2 + i] * coef;
         }
@@ -681,7 +699,7 @@ private:
 #ifdef USE_OPENMP
 #    pragma omp parallel for
 #endif
-        for (j = 0; j < m.m_y_max; j++)          // Then we make the matrix have only 1 in his diagonal
+        for (j = 0; j < m.m_y_max; j++) // Then we make the matrix have only 1 in his diagonal
         {
             m.divide_line(j, m.at_unsafe(j, j)); // Already checked
             s.divide_line(j, m.at_unsafe(j, j));
@@ -719,42 +737,73 @@ private:
         }
         return minor;
     }
-    static T get_determinant(Matrix<T> const& m) // this is O(n!)...
+    static bool lup_decompose(Matrix<T>& m, std::vector<size_t>& P)
     {
-        T det;
-        if (m.m_x_max == 1)
+        // Adapted from Wikipedia
+        // Computes an in-place LUP decomposition, where P is stored as list of column indexes of 1 in P
+        // The last element of P stores the number of row exchanges that have been made
+        size_t N = m.height();
+        for (size_t i = 0; i < N + 1; i++)
         {
-            det = m.at_unsafe(0, 0);
+            P[i] = i;
         }
-        else if (m.m_x_max == 2)
-        {
-            det = m.at_unsafe(0, 0) * m.at_unsafe(1, 1) - m.at_unsafe(0, 1) * m.at_unsafe(1, 0);
-        }
-        else if (m.m_x_max == 3)
-        {
-            T const a = m.at_unsafe(0, 0);
-            T const b = m.at_unsafe(1, 0);
-            T const c = m.at_unsafe(2, 0);
-            T const d = m.at_unsafe(0, 1);
-            T const e = m.at_unsafe(1, 1);
-            T const f = m.at_unsafe(2, 1);
-            T const g = m.at_unsafe(0, 2);
-            T const h = m.at_unsafe(1, 2);
-            T const i = m.at_unsafe(2, 2);
 
-            det = (a * e * i) - (a * f * h) + (b * f * g) - (b * d * i) + (c * d * h) - (c * e * g);
-        }
-        else
+        for (size_t i = 0; i < N; i++)
         {
-            int sign = 1;
-            det = 0;
-            for (size_t i = 0; i < m.m_x_max; i++)
+            T max_a = 0.;
+            size_t i_max = i;
+
+            for (size_t k = i; k < N; k++)
             {
-                det += sign * m.at_unsafe(i, 0) * m.get_minor_matrix_at_index(i).determinant();
-                sign = -sign;
+                size_t abs_a = std::fabs(m.at_unsafe(k, i));
+                if (abs_a > max_a)
+                {
+                    max_a = abs_a;
+                    i_max = k;
+                }
+            }
+
+            if (max_a < std::numeric_limits<T>::epsilon())
+            {
+                return false;
+            }
+
+            if (i_max != i)
+            {
+                std::swap(P[i], P[i_max]);
+                m.exchange_row(i, i_max);
+                P[N]++;
+            }
+            for (size_t j = i + 1; j < N; j++)
+            {
+                m.at_unsafe(j, i) /= m.at_unsafe(i, i);
+
+                for (size_t k = i + 1; k < N; k++)
+                {
+                    m.at_unsafe(j, k) -= m.at_unsafe(j, i) * m.at_unsafe(i, k);
+                }
             }
         }
-        return det;
+
+        return true;
+    }
+    static T lup_determinant(Matrix<T> const& m, std::vector<size_t> P)
+    {
+        size_t N = m.height();
+        T r = m.at_unsafe(0, 0);
+
+        for (size_t i = 1; i < N; i++)
+        {
+            r *= m.at_unsafe(i, i);
+        }
+        return (P[N] - N) % 2 == 0 ? r : -r;
+    }
+    static T get_determinant(Matrix<T> m) // O(n^3)
+    {
+        std::vector<size_t> P;
+        P.resize(m.height() + 1);
+        lup_decompose(m, P);
+        return lup_determinant(m, P);
     }
     size_t inline m_data_size() const
     {

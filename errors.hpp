@@ -31,6 +31,7 @@ public:
         matrix_not_inversible,
         access_out_of_range,
         line_number_out_of_range,
+        row_number_out_of_range,
         divide_by_zero,
         multiply_matrix_size_not_compatible,
         add_substract_matrix_size_not_compatible,
