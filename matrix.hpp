@@ -343,6 +343,24 @@ public:
     {
         return determinant() != 0;
     }
+    bool is_symmetrical() const
+    {
+        if (!is_square())
+        {
+            throw Error { Error::Type::matrix_must_be_square };
+        }
+        for (size_t i = 0; i < m_x_max; i++)
+        {
+            for (size_t j = i; j < m_y_max; j++)
+            {
+                if (at_unsafe(i, j) != at_unsafe(j, i))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
     static void Assert(int& nb_success, int& nb_test)
     {
         CREATE_ASSERT_TRUE
@@ -451,6 +469,10 @@ public:
             { 1, 2, 3 },
             { 4, 5, 6 },
             { 8, 7, 9 } } };
+        Matrix<long double> symmetrical { std::vector<std::vector<long double>> {
+            { 1, 2, 3 },
+            { 2, 5, 7 },
+            { 3, 7, 9 } } };
 
         assert_true(matrix1 == matrix2, "Two equals matrix are not considered as equal");
         assert_true(matrix1 != matrix3, "Two different matrix are considered as equal");
@@ -471,6 +493,8 @@ public:
         assert_true(not_inversible_matrix.determinant() == 0., "Not inversible_matrix does not has a null determinant");
         assert_true(determinant.determinant() == -9., "Determinant is broken");
         assert_true(!not_inversible_matrix.is_inversible(), "Not inversible matrix detected as inversible");
+        assert_true(!determinant.is_symmetrical(), "Non symmetrical matrix should not be considered as symmetrical");
+        assert_true(symmetrical.is_symmetrical(), "Symetrical matrix not considered as symmetrical");
 
 #undef ASSERT_THROWS
     }
