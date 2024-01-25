@@ -733,7 +733,7 @@ private:
             for (k = j; k < m.m_x_max - 1; k++)
             {
                 T coef = m.at_unsafe(k + 1, j); // Already checked
-                m.substract_line(j, k + 1, coef);
+                // This is not usefull to modify m here since it will not anymore be read
                 s.substract_line(j, k + 1, coef);
             }
         }
