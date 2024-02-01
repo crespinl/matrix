@@ -199,8 +199,8 @@ public:
             return;
         }
         Matrix<T> r = m1 * m2;
-        d = r(0, 1) / 2;
-        b = std::sqrt(-(r(0, 0) + std::pow<T>(*d, 2)));
+        T d1 = r(0, 1) / 2;
+        T b1 = std::sqrt(-(r(0, 0) + std::pow<T>(d1, 2)));
 
         std::vector<T> beta;
         beta.reserve(n);
@@ -208,8 +208,8 @@ public:
         etha.reserve(n);
         for (size_t i = 0; i < n; i++)
         {
-            beta.push_back(std::sin(*b * this->m_data[i].x()) * std::exp(*d * this->m_data[i].x()));
-            etha.push_back(std::cos(*b * this->m_data[i].x()) * std::exp(*d * this->m_data[i].x()));
+            beta.push_back(std::sin(b1 * this->m_data[i].x()) * std::exp(d1 * this->m_data[i].x()));
+            etha.push_back(std::cos(b1 * this->m_data[i].x()) * std::exp(d1 * this->m_data[i].x()));
         }
         T square_beta_sum = 0;
         T etha_beta_sum = 0;
@@ -237,15 +237,24 @@ public:
             return;
         }
         auto r2 = m3 * m4;
-        a = std::sqrt(std::pow<T>(r2(0, 0), 2) + std::pow<T>(r2(0, 1), 2));
+        T a1 = std::sqrt(std::pow<T>(r2(0, 0), 2) + std::pow<T>(r2(0, 1), 2));
+        T c1;
         if (r2(0, 0) > 0)
         {
-            c = std::atan(r2(0, 1) / r2(0, 0));
+            c1 = std::atan(r2(0, 1) / r2(0, 0));
         }
         else
         {
-            c = std::atan(r2(0, 1) / r2(0, 0)) + std::numbers::pi_v<T>;
+            c1 = std::atan(r2(0, 1) / r2(0, 0)) + std::numbers::pi_v<T>;
         }
+        if (!a)
+            a = a1;
+        if (!b)
+            b = b1;
+        if (!c)
+            c = c1;
+        if (!d)
+            d = d1;
     }
 
 private:
