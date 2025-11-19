@@ -639,7 +639,7 @@ private:
             at_unsafe(i, l2) = temp;
         }
     }
-    void substract_line(size_t l1, size_t l2, T const& coef = 1)
+    void substract_line(size_t l1, size_t l2, T const& coef = 1, size_t null_until = 0)
     {
         if (l1 >= m_y_max || l2 >= m_y_max)
         {
@@ -647,9 +647,30 @@ private:
         }
         size_t const begin_1 = index_of_unsafe(0, l1);
         size_t const begin_2 = index_of_unsafe(0, l2);
-        for (size_t i = 0; i < m_x_max; ++i)
+        for (size_t i = 0; i < null_until; i++)
+        {
+            m_data[begin_1 + i] = 0;
+        }
+        for (size_t i = null_until; i < m_x_max; ++i)
         {
             m_data[begin_1 + i] -= m_data[begin_2 + i] * coef;
+        }
+    }
+    void substract_line_null_end_line(size_t l1, size_t l2, T const& coef)
+    {
+        if (l1 >= m_y_max || l2 >= m_y_max)
+        {
+            throw Error { Error::Type::line_number_out_of_range };
+        }
+        size_t const begin_1 = index_of_unsafe(0, l1);
+        size_t const begin_2 = index_of_unsafe(0, l2);
+        for (size_t i = 0; i < l1 + 1; ++i)
+        {
+            m_data[begin_1 + i] -= m_data[begin_2 + i] * coef;
+        }
+        for (size_t i = l1 + 1; i < m_x_max; i++)
+        {
+            m_data[begin_1 + i] = 0;
         }
     }
     void divide_line(size_t l1, T const& value)
@@ -711,8 +732,8 @@ private:
                 for (k = j + 1; k < m.m_y_max; k++)
                 {
                     T coef = m.at_unsafe(j, k) / m.at_unsafe(j, j); // Already checked
-                    m.substract_line(k, j, coef);
-                    s.substract_line(k, j, coef);
+                    m.substract_line(k, j, coef, j + 1);
+                    s.substract_line_null_end_line(k, j, coef);
                 }
             }
             else
