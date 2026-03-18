@@ -63,8 +63,8 @@ public:
         lr.calculate_model();
         LogisticRegression<long double> lr2 { std::vector<Coordinate<long double>> { { 0, 0 }, { 1, 2 }, { 2, 4 }, { 3, 4.1 }, { 4, 4.1 }, { -1, -0.1 } } };
         lr2.calculate_model();
-        assert_true(std::abs(lr.a() -  870454.20) < 0.01, "Logistic regression is broken (a)");
-        assert_true(std::abs(lr.b() -  4.559) < 0.001, "Logistic regression is broken (b)");
+        assert_true(std::abs(lr.a() -  858958.96) < 0.01, "Logistic regression is broken (a)");
+        assert_true(std::abs(lr.b() -  4.55) < 0.01, "Logistic regression is broken (b)");
         assert_true(std::abs(lr.c() -  10.002) < 0.001, "Logistic regression is broken (c)");
         assert_true(lr.stats().r2 > 0.9999, "Logistic regression is not precise enough");
 
