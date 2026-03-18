@@ -36,7 +36,6 @@ SPDX itentifier : GPL-3.0-or-later
 #include <chrono>
 #include <fstream>
 #include <iostream>
-#include <plotter/plotter.hpp>
 #include <string>
 using namespace std;
 using namespace matrix;
