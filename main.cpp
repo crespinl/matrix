@@ -18,8 +18,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 SPDX itentifier : GPL-3.0-or-later
 */
 #include "coordinate.hpp"
+#include "damped_trigonometric_regression.hpp"
 #include "exponential_regression.hpp"
 #include "exponential_regression_2.hpp"
+#include "exponential_saturation_regression.hpp"
 #include "fourier.hpp"
 #include "gaussian_regression.hpp"
 #include "linear_regression.hpp"
@@ -30,11 +32,11 @@ SPDX itentifier : GPL-3.0-or-later
 #include "power_regression.hpp"
 #include "proportional_regression.hpp"
 #include "trigonometric_regression.hpp"
-#include "damped_trigonometric_regression.hpp"
 #include <cassert>
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <plotter/plotter.hpp>
 #include <string>
 using namespace std;
 using namespace matrix;
@@ -77,6 +79,7 @@ int main()
     PolynomialRegression<int>::Assert(nb_success, nb_test);
     ExponentialRegression<int>::Assert(nb_success, nb_test);
     ExponentialRegression2<int>::Assert(nb_success, nb_test);
+    ExponentialSaturationRegression<int>::Assert(nb_success, nb_test);
     LogarithmicRegression<int>::Assert(nb_success, nb_test);
     PowerRegression<int>::Assert(nb_success, nb_test);
     matrix::Fourier::Assert(nb_success, nb_test);
@@ -87,6 +90,5 @@ int main()
     cout << "Result : " << nb_success << " tests succeded on " << nb_test << " tests" << endl;
 
     // speed_test();
-
     return 0;
 }

@@ -8,7 +8,7 @@ set(CMAKE_BUILD_TYPE "Release")
 set(SRCS
     errors.cpp
 )
-    
+
 set(HEADERS
     gaussian_regression.hpp
     logistic_regression.hpp
@@ -21,6 +21,7 @@ set(HEADERS
     exponential_regression_2.hpp
     logarithmic_regression.hpp
     exponential_regression.hpp
+    exponential_saturation_regression.hpp
     polynomial_regression.hpp
     proportional_regression.hpp
     tests.hpp
@@ -36,7 +37,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fdiagnostics-color=always
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -Og")
 set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS} -O3 -march=native -mfpmath=sse")
 add_executable(matrix ${SRCS} main.cpp ${HEADERS})
-
 project(matrix_lib)
 
 add_library(matrix_lib STATIC ${SRCS} ${HEADERS})
